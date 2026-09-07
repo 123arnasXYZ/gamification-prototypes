@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gamification Prototypes</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700;1,800&display=swap">
+
+<style>
+/* ============================================================
+   Shell styling, taken from the slide deck: white ground, one
+   blue, a mint accent for section labels, Urbanist throughout.
+   Deliberately standalone — the prototypes inside the frame keep
+   their own dark theme from shared/style.css.
+   ============================================================ */
+:root {
+  --blue:      #2757E2;
+  --blue-dark: #1B41B4;
+  --mint:      #5FE0B0;
+  --ink:       #10131A;
+  --ink-soft:  #464B58;
+  --line:      #E4E7EF;
+  --grey:      #F4F6FA;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #fff;
+  color: var(--ink);
+  font-family: "Urbanist", "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.shell { height: 100%; display: flex; flex-direction: column; }
+
+/* ---------------- Header ---------------- */
+.bar {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  padding: 20px 34px 16px;
+}
+
+
+.headings { min-width: 0; flex: 1 1 auto; }
+
+.eyebrow {
+  font-style: italic;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 2px;
+}
+.eyebrow .num { font-weight: 800; }
+
+h1 {
+  margin: 0;
+  font-size: clamp(22px, 3vw, 38px);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: var(--blue);
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: none;
+  padding-bottom: 4px;
+}
+
+.dots { display: flex; gap: 8px; }
+.dots button {
+  width: 10px; height: 10px; padding: 0;
+  border: 0; border-radius: 50%;
+  background: #CBD2E4;
+  cursor: pointer;
+  transition: background .18s ease, transform .18s ease;
+}
+.dots button:hover { background: #97A5C8; }
+.dots button[aria-current="true"] { background: var(--blue); transform: scale(1.35); }
+
+.pill {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--blue);
+  background: #fff;
+  border: 2px solid var(--blue);
+  border-radius: 999px;
+  padding: 7px 16px;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background .16s ease, color .16s ease;
+}
+.pill:hover { background: var(--blue); color: #fff; }
+.pill.ghost { border-color: var(--line); color: var(--ink-soft); }
+.pill.ghost:hover { border-color: var(--blue); background: #fff; color: var(--blue); }
+
+/* ---------------- Viewer ---------------- */
+.viewer {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 4px 82px 18px;
+}
+.frame-wrap {
+  position: absolute;
+  inset: 4px 82px 18px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 3px solid var(--blue);
+  background: #0b0e13;
+  transition: opacity .2s ease, transform .2s ease;
+}
+.frame-wrap iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+.nav {
+  position: absolute;
+  top: 50%;
+  width: 54px; height: 54px;
+  margin-top: -27px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--blue);
+  color: #fff;
+  font-size: 27px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 6px 18px rgba(39, 87, 226, 0.28);
+  transition: background .16s ease, transform .16s ease;
+}
+.nav:hover { background: var(--blue-dark); transform: scale(1.07); }
+.nav:active { transform: scale(0.97); }
+.nav.prev { left: 14px; padding-right: 3px; }
+.nav.next { right: 14px; padding-left: 3px; }
+
+/* ---------------- Notes ---------------- */
+.notes {
+  flex: 0 0 auto;
+  padding: 0 34px 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 250px;
+  gap: 26px;
+  align-items: start;
+  transition: max-height .3s ease, opacity .22s ease, padding .3s ease;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.label {
+  display: block;
+  background: var(--mint);
+  border-radius: 9px;
+  padding: 11px 16px;
+  margin-bottom: 12px;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 13.5px;
+  letter-spacing: .02em;
+  color: #0C1A16;
+  text-transform: uppercase;
+}
+
+.notes p {
+  margin: 0 0 9px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+.notes p:last-child { margin-bottom: 0; }
+
+.pads { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.pads img { width: 44px; height: auto; display: block; }
+
+.tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+.tags span {
+  font-size: 12.5px; font-weight: 700;
+  padding: 6px 13px; border-radius: 999px;
+  background: var(--grey); color: var(--ink);
+}
+
+.shell.tight .notes {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 940px) {
+  html, body { overflow: auto; }
+  .shell { height: auto; min-height: 100%; }
+  .bar { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .viewer { height: 58vh; padding: 4px 12px 14px; }
+  .frame-wrap { inset: 4px 12px 14px; }
+  .nav { width: 42px; height: 42px; margin-top: -21px; font-size: 21px; }
+  .nav.prev { left: 2px; } .nav.next { right: 2px; }
+  .notes { grid-template-columns: 1fr; max-height: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="shell" id="shell">
+
+  <header class="bar">
+    <div class="headings">
+      <div class="eyebrow"><span class="num" id="count">01/04</span> Gamification ideas</div>
+      <h1 id="title">—</h1>
+    </div>
+    <div class="tools">
+      <div class="dots" id="dots" role="tablist" aria-label="Choose a prototype"></div>
+      <button class="pill ghost" id="toggle" type="button" aria-expanded="true">Hide notes</button>
+    </div>
+  </header>
+
+  <div class="viewer">
+    <div class="frame-wrap" id="frameWrap">
+      <iframe id="frame" title="Prototype" allow="fullscreen"></iframe>
+    </div>
+    <button class="nav prev" id="prev" type="button" aria-label="Previous prototype">‹</button>
+    <button class="nav next" id="next" type="button" aria-label="Next prototype">›</button>
+  </div>
+
+  <section class="notes" id="notes">
+    <div>
+      <span class="label">// The idea:</span>
+      <p id="idea"></p>
+    </div>
+    <div>
+      <span class="label">// Why it works:</span>
+      <div id="why"></div>
+    </div>
+    <div>
+      <span class="label">// Effort:</span>
+      <div class="pads" id="pads" role="img"></div>
+      <div class="tags" id="tags"></div>
+    </div>
+  </section>
+
+</div>
+
+<script type="module">
+import { prototypes } from './shell/content.js';
+
+const frame = document.getElementById('frame');
+const frameWrap = document.getElementById('frameWrap');
+const titleEl = document.getElementById('title');
+const countEl = document.getElementById('count');
+const ideaEl = document.getElementById('idea');
+const whyEl = document.getElementById('why');
+const padsEl = document.getElementById('pads');
+const tagsEl = document.getElementById('tags');
+const dotsEl = document.getElementById('dots');
+const shell = document.getElementById('shell');
+
+const MAX_EFFORT = 5;
+const pad = (n) => String(n).padStart(2, '0');
+let index = 0;
+
+prototypes.forEach((p, i) => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.title = p.label;
+  b.setAttribute('role', 'tab');
+  b.setAttribute('aria-label', p.title);
+  b.addEventListener('click', () => go(i));
+  dotsEl.append(b);
+});
+
+function render(i) {
+  const p = prototypes[i];
+
+  titleEl.textContent = p.title;
+  countEl.textContent = `${pad(i + 1)}/${pad(prototypes.length)}`;
+  ideaEl.textContent = p.idea;
+
+  whyEl.replaceChildren(...p.why.map((text) => {
+    const node = document.createElement('p');
+    node.textContent = text;
+    return node;
+  }));
+
+  padsEl.setAttribute('aria-label', `Effort: ${p.effort} out of ${MAX_EFFORT}`);
+  padsEl.replaceChildren(...Array.from({ length: MAX_EFFORT }, (_, n) => {
+    const img = document.createElement('img');
+    img.src = n < p.effort ? './assets/controller_full.png' : './assets/controller_empty.png';
+    img.alt = '';
+    return img;
+  }));
+
+  // Optional topic tags — fill in `tags` in shell/content.js to show them
+  tagsEl.replaceChildren(...(p.tags ?? []).map((t) => {
+    const span = document.createElement('span');
+    span.textContent = t;
+    return span;
+  }));
+
+  frame.title = p.title;
+  frame.src = p.url;
+
+  [...dotsEl.children].forEach((d, n) => d.setAttribute('aria-current', String(n === i)));
+  history.replaceState(null, '', `#${p.id}`);
+}
+
+/** Swap with a short slide so the direction of travel is readable. */
+function go(next, dir = next > index ? 1 : -1) {
+  const target = (next + prototypes.length) % prototypes.length;
+  if (target === index && frame.src) return;
+  index = target;
+
+  frameWrap.style.opacity = '0';
+  frameWrap.style.transform = `translateX(${-dir * 26}px)`;
+
+  setTimeout(() => {
+    render(index);
+    frameWrap.style.transform = `translateX(${dir * 26}px)`;
+    requestAnimationFrame(() => {
+      frameWrap.style.opacity = '1';
+      frameWrap.style.transform = 'none';
+    });
+  }, 200);
+}
+
+document.getElementById('prev').addEventListener('click', () => go(index - 1, -1));
+document.getElementById('next').addEventListener('click', () => go(index + 1, 1));
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.closest('input, textarea')) return;
+  if (e.key === 'ArrowLeft') go(index - 1, -1);
+  if (e.key === 'ArrowRight') go(index + 1, 1);
+});
+
+const toggle = document.getElementById('toggle');
+toggle.addEventListener('click', () => {
+  const tight = shell.classList.toggle('tight');
+  toggle.textContent = tight ? 'Show notes' : 'Hide notes';
+  toggle.setAttribute('aria-expanded', String(!tight));
+});
+
+// Deep link support: index.html#photo-hunt opens that one directly.
+// Changing only the hash does not reload the page, so follow it live too
+// (replaceState inside render() does not fire this event).
+window.addEventListener('hashchange', () => {
+  const i = prototypes.findIndex((p) => p.id === location.hash.slice(1));
+  if (i >= 0 && i !== index) go(i);
+});
+
+const start = prototypes.findIndex((p) => p.id === location.hash.slice(1));
+index = start >= 0 ? start : 0;
+render(index);
+</script>
+
+</body>
+</html>

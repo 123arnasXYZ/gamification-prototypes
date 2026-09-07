@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Decision Deck — Crane Lift in Rain</title>
+<!-- ?v= bumps the cache when the shared styling changes -->
+<link rel="stylesheet" href="../../shared/style.css?v=2">
+<style>
+  /* Verdict badge on the feedback panel */
+  .verdict-tag {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+  .verdict-tag.best { background: var(--mint);   color: #0C1A16; }
+  .verdict-tag.ok   { background: #E6ECFD;       color: var(--blue); }
+  .verdict-tag.bad  { background: var(--danger); color: #fff; }
+
+  .deltas { display: flex; gap: 8px; margin: 10px 0 2px; flex-wrap: wrap; }
+  #feedback p { font-size: 13px; line-height: 1.5; }
+  #feedback h2 { margin: 2px 0 0; }
+  .delta {
+    font-size: 12.5px; font-weight: 700;
+    padding: 5px 11px; border-radius: var(--r-sm);
+    border: 1px solid var(--line-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .delta.up   { color: var(--good);   border-color: #12A17755; background: #12A17712; }
+  .delta.down { color: var(--danger); border-color: #E0234E55; background: #E0234E12; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<div class="stage" id="stage"></div>
+
+<div class="ui-layer">
+  <div class="topbar">
+    <div class="panel" style="max-width:min(480px,52vw)">
+      <div class="eyebrow" id="eyebrow"></div>
+      <div class="title" id="title" style="margin:4px 0 6px"></div>
+      <p id="scenario"></p>
+    </div>
+    <div class="spacer"></div>
+    <div class="stats" id="stats"></div>
+  </div>
+
+  <!-- Spacer, so the panel and the dock stay pinned to the bottom whether
+       or not the feedback panel is showing. -->
+  <div style="flex:1"></div>
+
+  <div class="panel clickable" id="feedback" style="max-width:min(560px,88vw);margin:0 auto 10px;display:none"></div>
+
+  <div class="dock" style="margin-top:0">
+    <div class="hint" id="hint">Pick one of the three cards.</div>
+    <div style="flex:1"></div>
+    <button class="btn ghost clickable" id="restart" type="button">Restart</button>
+  </div>
+</div>
+
+<div class="loading" id="loading">Rain moving in…</div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>

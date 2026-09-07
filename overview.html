@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gamification Prototypes — Overview</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700;1,800&display=swap">
+
+<style>
+:root {
+  --blue:      #2757E2;
+  --blue-dark: #1B41B4;
+  --mint:      #5FE0B0;
+  --ink:       #10131A;
+  --ink-soft:  #464B58;
+  --line:      #E4E7EF;
+  --grey:      #F4F6FA;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #fff;
+  color: var(--ink);
+  font-family: "Urbanist", "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 1120px; margin: 0 auto; padding: 46px 28px 80px; position: relative; }
+
+/* Corner slashes, same signature as the carousel */
+.slash, .slash::after {
+  position: absolute;
+  background: var(--blue);
+  border-radius: 2px;
+  pointer-events: none;
+}
+.slash { top: 26px; right: -30px; width: 260px; height: 10px; transform: rotate(-13deg); }
+.slash::after { content: ""; top: 21px; left: 96px; width: 140px; height: 7px; }
+
+.eyebrow {
+  font-style: italic; font-weight: 700; font-size: 13px;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--blue);
+}
+
+h1 {
+  margin: 6px 0 14px;
+  font-size: clamp(28px, 4vw, 46px);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: var(--blue);
+  max-width: 16ch;
+}
+
+.lead { color: var(--ink-soft); font-size: 16px; line-height: 1.6; max-width: 66ch; margin: 0 0 10px; }
+
+.back {
+  display: inline-block;
+  margin-bottom: 34px;
+  font-size: 13px; font-weight: 700;
+  color: var(--blue);
+  border: 2px solid var(--blue);
+  border-radius: 999px;
+  padding: 8px 18px;
+  text-decoration: none;
+  transition: background .16s ease, color .16s ease;
+}
+.back:hover { background: var(--blue); color: #fff; }
+
+.grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); }
+
+a.card {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--line);
+  border-radius: 18px;
+  padding: 22px 24px 24px;
+  text-decoration: none;
+  color: inherit;
+  background: #fff;
+  transition: border-color .16s ease, transform .16s ease;
+}
+a.card:hover { border-color: var(--blue); transform: translateY(-3px); }
+
+.card .num {
+  font-style: italic; font-weight: 800; font-size: 12.5px;
+  letter-spacing: .06em; color: var(--blue);
+}
+.card h2 {
+  margin: 4px 0 14px;
+  font-size: 23px; font-weight: 800; line-height: 1.1;
+  letter-spacing: -0.01em; color: var(--blue);
+}
+.label {
+  display: block;
+  background: var(--mint);
+  border-radius: 9px;
+  padding: 9px 14px;
+  margin-bottom: 10px;
+  font-style: italic; font-weight: 700; font-size: 12.5px;
+  text-transform: uppercase; color: #0C1A16;
+}
+.card p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-soft); }
+
+.card .foot {
+  margin-top: auto;
+  padding-top: 18px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.pads { display: flex; gap: 5px; }
+.pads img { width: 32px; height: auto; display: block; }
+.open { font-size: 13px; font-weight: 800; color: var(--blue); white-space: nowrap; }
+
+.notes {
+  margin-top: 42px;
+  border: 2px solid var(--line);
+  border-radius: 18px;
+  padding: 24px 26px;
+}
+.notes h3 { margin: 0 0 12px; font-size: 16px; font-weight: 800; }
+.notes ul { margin: 0; padding-left: 20px; color: var(--ink-soft); font-size: 14px; line-height: 1.6; }
+.notes li { margin-bottom: 8px; }
+code {
+  font-family: "JetBrains Mono", Consolas, ui-monospace, monospace;
+  font-size: 12.5px;
+  background: var(--grey);
+  border: 1px solid var(--line);
+  padding: 2px 6px;
+  border-radius: 5px;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <i class="slash"></i>
+
+  <div class="eyebrow">Three.js learning prototypes</div>
+  <h1>Four interactive mechanics, ready to embed</h1>
+  <p class="lead">
+    Each prototype is a self-contained folder: one HTML file, one script, one content file.
+    No build step and nothing to install — drop the folder on a server and put it in an
+    <code>&lt;iframe&gt;</code>. All the learner-facing wording lives in <code>content.js</code>,
+    so a topic swap never touches the 3D code.
+  </p>
+  <a class="back" href="./index.html">← Back to the carousel</a>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="notes">
+    <h3>Embedding these in WordPress</h3>
+    <ul>
+      <li>Upload the whole project folder to your host, for example <code>/wp-content/uploads/prototypes/</code>.</li>
+      <li>Embed the carousel with <code>&lt;iframe src="/wp-content/uploads/prototypes/" width="100%" height="860"&gt;&lt;/iframe&gt;</code>, or a single prototype with its own folder path at 640px tall.</li>
+      <li>Each prototype posts <code>ready</code>, <code>progress</code> and <code>complete</code> messages to the parent page — see <code>README.md</code> for the listener snippet.</li>
+      <li>They need WebGL and a modern browser. Nothing is written to the server and no data leaves the page.</li>
+    </ul>
+  </div>
+</div>
+
+<script type="module">
+import { prototypes } from './shell/content.js';
+
+const grid = document.getElementById('grid');
+const pad = (n) => String(n).padStart(2, '0');
+
+grid.replaceChildren(...prototypes.map((p, i) => {
+  const card = document.createElement('a');
+  card.className = 'card';
+  card.href = `./index.html#${p.id}`;
+
+  const pads = Array.from({ length: 5 }, (_, n) =>
+    `<img src="./assets/controller_${n < p.effort ? 'full' : 'empty'}.png" alt="">`).join('');
+
+  card.innerHTML = `
+    <div class="num">${pad(i + 1)}/${pad(prototypes.length)}</div>
+    <h2></h2>
+    <span class="label">// The idea:</span>
+    <p></p>
+    <div class="foot">
+      <div class="pads" role="img" aria-label="Effort: ${p.effort} out of 5">${pads}</div>
+      <span class="open">Open →</span>
+    </div>`;
+
+  card.querySelector('h2').textContent = p.title;
+  card.querySelector('p').textContent = p.idea;
+  return card;
+}));
+</script>
+</body>
+</html>

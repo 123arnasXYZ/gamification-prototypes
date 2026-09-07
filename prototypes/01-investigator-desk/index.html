@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Investigator Desk — Medical &amp; Compliance</title>
+<!-- ?v= bumps the cache when the shared styling changes -->
+<link rel="stylesheet" href="../../shared/style.css?v=2">
+<style>
+  /* Mode switch, specific to this prototype */
+  .modes {
+    display: inline-flex;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: var(--shadow-sm);
+  }
+  .modes button {
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink-dim);
+    background: transparent;
+    border: 0;
+    border-radius: 999px;
+    padding: 8px 18px;
+    cursor: pointer;
+    transition: background .16s ease, color .16s ease;
+  }
+  .modes button:hover { color: var(--blue); }
+  .modes button[aria-pressed="true"] {
+    background: var(--blue);
+    color: #fff;
+  }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<div class="stage" id="stage"></div>
+
+<div class="ui-layer">
+  <div class="topbar">
+    <div class="panel">
+      <div class="eyebrow" id="eyebrow"></div>
+      <div class="title" id="title"></div>
+    </div>
+    <div class="modes clickable" id="modes" role="group" aria-label="Training topic"></div>
+    <div class="spacer"></div>
+    <div class="stats" id="stats"></div>
+  </div>
+
+  <div class="dock">
+    <div class="hint" id="hint"></div>
+    <div style="flex:1"></div>
+    <button class="btn ghost clickable" id="restart" type="button">Restart</button>
+  </div>
+</div>
+
+<div class="loading" id="loading">Setting up the desk…</div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>
