@@ -1,8 +1,13 @@
 # Gamification prototypes (Three.js)
 
+**Live: <https://123arnasxyz.github.io/gamification-prototypes/>**
+
 Four small interactive learning mechanics built on Three.js, designed to be dropped into a
 WordPress page as an `<iframe>`. There is **no build step** — the browser loads ES modules
 directly and Three.js comes from a CDN via an import map.
+
+Because there is nothing to compile, GitHub Pages serves the repository as-is: pushing to `main`
+publishes. Deep links work too — `#photo-hunt` on the end of the URL opens that prototype.
 
 ```
 serve.py                       dev server with caching disabled
@@ -61,11 +66,12 @@ the console (`window.__desk`, `__deck`, `__def`, `__hunt`).
    `../../shared/` by relative path.
 2. In the page or post, add a **Custom HTML** block.
 
-**The whole carousel** — all four with their write-ups and prev/next arrows:
+**The whole carousel** — all four with their write-ups and prev/next arrows. Point it either at
+the GitHub Pages URL (nothing to upload, updates when you push) or at your own copy:
 
 ```html
 <iframe
-  src="/wp-content/uploads/prototypes/"
+  src="https://123arnasxyz.github.io/gamification-prototypes/"
   width="100%" height="860"
   style="border:0; border-radius:12px; display:block"
   title="Gamification prototypes"
