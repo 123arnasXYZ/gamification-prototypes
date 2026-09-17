@@ -244,7 +244,7 @@ h1 {
   <section class="notes" id="notes">
     <div>
       <span class="label">// The idea:</span>
-      <p id="idea"></p>
+      <div id="idea"></div>
     </div>
     <div>
       <span class="label">// Why it works:</span>
@@ -292,7 +292,12 @@ function render(i) {
 
   titleEl.textContent = p.title;
   countEl.textContent = `${pad(i + 1)}/${pad(prototypes.length)}`;
-  ideaEl.textContent = p.idea;
+  const paragraphs = (value) => [].concat(value).map((text) => {
+    const node = document.createElement('p');
+    node.textContent = text;
+    return node;
+  });
+  ideaEl.replaceChildren(...paragraphs(p.idea));
 
   whyEl.replaceChildren(...p.why.map((text) => {
     const node = document.createElement('p');

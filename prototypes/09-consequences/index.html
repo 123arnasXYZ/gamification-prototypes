@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Use Immediate Consequences as Feedback — Pallet</title>
+<!-- ?v= bumps the cache when the shared styling changes -->
+<link rel="stylesheet" href="../../shared/style.css?v=2">
+<style>
+  /* Keep the "what just happened" line clear of the bottom panel */
+  .toasts { bottom: 110px; }
+
+  .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; width: 100%; }
+  .row .grow { flex: 1; min-width: 180px; }
+
+  .recap { width: 100%; }
+  .recap h2 { color: var(--blue); font-size: 20px; margin: 2px 0 6px; }
+  .recap .driver { font-size: 14px; color: var(--ink-dim); font-style: italic; margin: 0 0 10px; }
+  .beat { border-left: 3px solid var(--line-2); padding: 2px 0 2px 12px; margin-bottom: 7px; font-size: 13.5px; color: var(--ink-dim); }
+  .beat b { color: var(--ink); }
+  .recap .q { font-size: 13.5px; color: var(--ink); font-style: italic; margin: 12px 0 10px; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<div class="stage" id="stage"></div>
+
+<div class="ui-layer">
+  <div class="topbar">
+    <div class="panel">
+      <div class="eyebrow" id="eyebrow"></div>
+      <div class="title" id="title"></div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn ghost clickable" id="restart" type="button">Restart</button>
+  </div>
+
+  <div style="flex:1"></div>
+
+  <div class="panel clickable" id="bottom" style="width:min(620px,96vw);margin:0 auto"></div>
+</div>
+
+<div class="loading" id="loading">Opening the bay…</div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>

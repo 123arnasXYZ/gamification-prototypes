@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Make Progress Impossible to Miss — Level Map</title>
+<!-- ?v= bumps the cache when the shared styling changes -->
+<link rel="stylesheet" href="../../shared/style.css?v=2">
+<style>
+  .challenge { width: min(560px, 94vw); margin: 0 auto; animation: rise .3s cubic-bezier(.2,.9,.3,1) both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+  .challenge h2 { margin: 2px 0 6px; font-size: 18px; color: var(--blue); }
+  .challenge .q { font-size: 14.5px; color: var(--ink); margin: 0 0 12px; line-height: 1.45; }
+  .options { display: flex; flex-direction: column; gap: 7px; }
+  .opt {
+    font: inherit; font-size: 14px; font-weight: 600; text-align: left;
+    padding: 10px 14px; border-radius: var(--r-sm);
+    border: 2px solid var(--line-2); background: #fff; color: var(--ink);
+    cursor: pointer; transition: border-color .14s, background .14s;
+  }
+  .opt:hover:not(:disabled) { border-color: var(--blue); }
+  .opt:disabled { cursor: default; }
+  .opt.wrong { border-color: var(--danger); color: var(--ink-dim); text-decoration: line-through; opacity: .7; }
+  .opt.right { border-color: var(--good); background: #12A17714; }
+  .feedback { margin-top: 10px; font-size: 13.5px; color: var(--ink-dim); }
+  .feedback b { color: var(--danger); }
+  .row-end { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<div class="stage" id="stage"></div>
+
+<div class="ui-layer">
+  <div class="topbar" style="align-items:flex-start">
+    <div class="panel">
+      <div class="eyebrow" id="eyebrow"></div>
+      <div class="title" id="title"></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="stats" id="stats"></div>
+  </div>
+
+  <div style="flex:1"></div>
+
+  <div class="panel clickable challenge" id="challenge" hidden></div>
+
+  <div class="dock" style="margin-top:10px">
+    <div class="hint" id="hint"></div>
+    <div style="flex:1"></div>
+    <button class="btn ghost clickable" id="restart" type="button">Restart</button>
+  </div>
+</div>
+
+<div class="loading" id="loading">Laying out the map…</div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>

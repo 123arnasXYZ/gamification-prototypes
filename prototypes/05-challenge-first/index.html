@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Start With the Challenge — Missed Deadline</title>
+<!-- ?v= bumps the cache when the shared styling changes -->
+<link rel="stylesheet" href="../../shared/style.css?v=2">
+<style>
+  .hints { display: flex; flex-direction: column; gap: 8px; width: min(300px, 38vw); }
+  .hint-card {
+    display: flex; gap: 10px; align-items: flex-start;
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--r-sm); padding: 10px 12px;
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    font-size: 13px; color: var(--ink-dim);
+  }
+  .hint-card .n {
+    flex: none; width: 22px; height: 22px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 11px; font-weight: 800;
+    background: var(--grey); color: var(--ink-dim);
+  }
+  .hint-card b { display: block; color: var(--ink); font-size: 13.5px; margin-bottom: 2px; }
+  .hint-card.open { border-color: var(--mint); animation: hint-in .35s cubic-bezier(.2,.9,.3,1) both; }
+  .hint-card.open .n { background: var(--mint); color: #0C1A16; }
+  @keyframes hint-in { from { opacity: 0; transform: translateX(14px); } }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<div class="stage" id="stage"></div>
+
+<div class="ui-layer">
+  <div class="topbar" style="align-items:flex-start">
+    <!-- Hints live on the left: the scene fills the right side -->
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="panel" style="max-width:min(430px,50vw)">
+        <div class="eyebrow" id="eyebrow"></div>
+        <div class="title" id="title"></div>
+      </div>
+      <div class="hints" id="hints"></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="stats" id="stats"></div>
+  </div>
+
+  <div class="dock">
+    <div class="hint" id="hint"></div>
+    <div style="flex:1"></div>
+    <button class="btn ghost clickable" id="restart" type="button">Restart</button>
+  </div>
+</div>
+
+<div class="loading" id="loading">Opening the office…</div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>

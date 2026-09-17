@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Let Learners Build Their Answer — Returns Desk</title>
+<!-- ?v= bumps the cache when the shared styling changes -->
+<link rel="stylesheet" href="../../shared/style.css?v=2">
+<style>
+  .quote { font-size: 15px; color: var(--ink); line-height: 1.45; margin-top: 6px; }
+  .quote::before { content: "“"; color: var(--blue); font-weight: 800; }
+  .quote::after  { content: "”"; color: var(--blue); font-weight: 800; }
+
+  .builder { width: min(640px, 94vw); margin: 0 auto; }
+  .row { display: grid; grid-template-columns: 70px 1fr; gap: 10px; align-items: center; margin-bottom: 9px; }
+  .row .name {
+    font-style: italic; font-weight: 800; font-size: 11px; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--blue);
+  }
+  .chips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .chip {
+    font: inherit; font-size: 13px; font-weight: 700;
+    padding: 8px 6px; border-radius: var(--r-sm);
+    border: 2px solid var(--line-2); background: #fff; color: var(--ink);
+    cursor: pointer; transition: border-color .14s, background .14s, color .14s;
+  }
+  .chip:hover { border-color: var(--blue); color: var(--blue); }
+  .chip[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+  .preview {
+    margin: 12px 0 12px; padding: 11px 14px;
+    border-radius: var(--r-sm); background: var(--grey);
+    font-size: 14px; line-height: 1.5; color: var(--ink); min-height: 46px;
+  }
+  .preview .empty { color: var(--ink-dim); font-style: italic; }
+  .preview .t { color: var(--blue); }
+
+  .parts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+  .part { border: 1px solid var(--line); border-radius: var(--r-sm); padding: 10px 12px; }
+  .part .top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .part .k { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; font-weight: 800; color: var(--ink-dim); }
+  .part .mark { font-weight: 800; font-size: 13px; }
+  .part .mark.s2 { color: var(--good); }
+  .part .mark.s1 { color: #C98A0E; }
+  .part .mark.s0 { color: var(--danger); }
+  .part p { margin: 0; font-size: 13px; color: var(--ink-dim); }
+  .said { font-size: 14.5px; color: var(--ink); margin: 4px 0 0; }
+  .said::before { content: "Customer: "; font-weight: 800; color: var(--blue); }
+  .verdict-line { font-size: 20px; font-weight: 800; color: var(--blue); letter-spacing: -0.01em; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<div class="stage" id="stage"></div>
+
+<div class="ui-layer">
+  <div class="topbar" style="align-items:flex-start">
+    <div class="panel" style="max-width:min(460px,52vw)">
+      <div class="eyebrow" id="eyebrow"></div>
+      <div class="quote" id="customer"></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="stats" id="stats"></div>
+  </div>
+
+  <div style="flex:1"></div>
+
+  <div class="panel clickable builder" id="builder"></div>
+</div>
+
+<div class="loading" id="loading">Opening the desk…</div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Make the Tutorial Invisible — Sorting Station</title>
+<!-- ?v= bumps the cache when the shared styling changes -->
+<link rel="stylesheet" href="../../shared/style.css?v=2">
+<style>
+  /* Step strip: where you are, and how much help you are getting */
+  .steps { display: flex; gap: 6px; }
+  .step {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--r-sm); padding: 7px 11px; min-width: 104px;
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  }
+  .step .k { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--ink-dim); }
+  .step .v { font-size: 13.5px; font-weight: 800; color: var(--ink); }
+  .step .h { font-size: 11px; color: var(--ink-dim); font-style: italic; }
+  .step.now { border-color: var(--blue); box-shadow: 0 0 0 2px var(--blue) inset, var(--shadow-sm); }
+  .step.now .v { color: var(--blue); }
+  .step.done { opacity: .75; }
+  .step.done .v::before { content: "✓ "; color: var(--good); }
+
+  /* The coach: a speech bubble that points at the thing to use */
+  .coach {
+    position: fixed; z-index: 25;
+    transform: translate(-50%, calc(-100% - 16px));
+    background: var(--blue); color: #fff;
+    font-weight: 700; font-size: 14px;
+    padding: 10px 16px; border-radius: 12px;
+    box-shadow: var(--shadow);
+    max-width: 280px; text-align: center;
+    pointer-events: none;
+    animation: coach-in .25s cubic-bezier(.2,.9,.3,1) both;
+  }
+  .coach::after {
+    content: ""; position: absolute; left: 50%; bottom: -7px;
+    width: 14px; height: 14px; background: var(--blue);
+    transform: translateX(-50%) rotate(45deg);
+  }
+  @keyframes coach-in { from { opacity: 0; transform: translate(-50%, calc(-100% - 6px)); } }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<div class="stage" id="stage"></div>
+
+<div class="ui-layer">
+  <div class="topbar" style="align-items:flex-start">
+    <div class="panel">
+      <div class="eyebrow" id="eyebrow"></div>
+      <div class="title" id="title"></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="steps" id="steps"></div>
+  </div>
+
+  <div class="dock">
+    <div class="hint" id="hint">No instructions — just start.</div>
+    <div style="flex:1"></div>
+    <div class="stats" id="stats"></div>
+    <button class="btn ghost clickable" id="restart" type="button">Restart</button>
+  </div>
+</div>
+
+<div class="loading" id="loading">Opening the station…</div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>

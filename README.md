@@ -2,7 +2,7 @@
 
 **Live: <https://123arnasxyz.github.io/gamification-prototypes/>**
 
-Four small interactive learning mechanics built on Three.js, designed to be dropped into a
+Nine small interactive learning mechanics built on Three.js, designed to be dropped into a
 WordPress page as an `<iframe>`. There is **no build step** — the browser loads ES modules
 directly and Three.js comes from a CDN via an import map.
 
@@ -20,6 +20,7 @@ shell/
   content.js                   the pitch text shown around each prototype in the carousel
 shared/
   engine.js                    Three.js setup: renderer, camera, lights, picking, tweens
+  person.js                    low-poly character with a visible mood (used by 07)
   ui.js                        DOM overlay helpers: panels, toasts, stat counters, results
   style.css                    the shared design system (tokens + components)
   embed.js                     postMessage bridge to the hosting page
@@ -28,6 +29,11 @@ prototypes/
   02-decision-deck/
   03-defence-waves/
   04-photo-hunt/
+  05-challenge-first/          try first; hints unlock only when an attempt fails
+  06-invisible-tutorial/       one new rule per step, help fading to nothing
+  07-build-your-answer/        tone x action, each part scored on its own
+  08-progress-map/             level map where stages unlock only by succeeding
+  09-consequences/             no feedback box; an overloaded box is crushed on the spot
 ```
 
 Every prototype follows the same shape: `index.html` holds the DOM overlay, `main.js` builds the
@@ -142,6 +148,11 @@ Two alternatives, both fine:
 | `02-decision-deck` | The scenario wording, the three meters and their starting values, and the three cards with their effects and feedback |
 | `03-defence-waves` | The asset, the two controls and what each one `stops`, the two waves, the debrief |
 | `04-photo-hunt` | The one hazard and its position, the three waypoints, and how much film |
+| `05-challenge-first` | The task, the three places to deal with it and what each wrong one leads to, the two hints, and the two endings |
+| `06-invisible-tutorial` | The four steps: which bins exist, which parcels arrive, how much help (`always` / `once` / `when-new` / `none`) and the coach wording |
+| `07-build-your-answer` | The tone and action options with their scores, lines and feedback, plus the verdict and customer-reply rules |
+| `08-progress-map` | The stages in order, each with its question, options and the explanation shown on a wrong answer |
+| `09-consequences` | The three boxes (weight and how much each can carry), what you see when one is crushed, and what the driver says at the other end |
 | `shell/content.js` | The title, "the idea", "why it works" and the 1–5 effort rating shown around each prototype in the carousel |
 
 A few rules the code depends on:

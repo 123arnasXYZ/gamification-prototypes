@@ -142,7 +142,7 @@ code {
   <i class="slash"></i>
 
   <div class="eyebrow">Three.js learning prototypes</div>
-  <h1>Four interactive mechanics, ready to embed</h1>
+  <h1>Interactive mechanics, ready to embed</h1>
   <p class="lead">
     Each prototype is a self-contained folder: one HTML file, one script, one content file.
     No build step and nothing to install — drop the folder on a server and put it in an
@@ -189,7 +189,7 @@ grid.replaceChildren(...prototypes.map((p, i) => {
     </div>`;
 
   card.querySelector('h2').textContent = p.title;
-  card.querySelector('p').textContent = p.idea;
+  card.querySelector('p').textContent = [].concat(p.idea)[0];   // first line is enough on a card
   return card;
 }));
 </script>
