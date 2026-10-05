@@ -12,10 +12,10 @@
 
 <style>
 /* ============================================================
-   Shell styling, taken from the slide deck: white ground, one
-   blue, a mint accent for section labels, Urbanist throughout.
-   Deliberately standalone — the prototypes inside the frame keep
-   their own dark theme from shared/style.css.
+   Slide layout: the pitch on the left, the live prototype on the
+   right. White ground, one blue, mint pills for the topic tags,
+   Urbanist throughout. The prototypes inside the frame keep their
+   own theme from shared/style.css.
    ============================================================ */
 :root {
   --blue:      #2757E2;
@@ -25,6 +25,8 @@
   --ink-soft:  #464B58;
   --line:      #E4E7EF;
   --grey:      #F4F6FA;
+  --nav:       96px;   /* space kept clear for the logo and arrows */
+  --top:       26px;   /* blue block and prototype frame start on this line */
 }
 
 * { box-sizing: border-box; }
@@ -40,108 +42,157 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
-.shell { height: 100%; display: flex; flex-direction: column; }
-
-/* ---------------- Header ---------------- */
-.bar {
-  position: relative;
-  flex: 0 0 auto;
-  display: flex;
-  align-items: flex-end;
-  gap: 24px;
-  padding: 20px 34px 16px;
+.slide {
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(360px, 42fr) 58fr;
+  gap: 26px;
+  padding-bottom: var(--nav);
 }
 
+/* ---------------- Left: the pitch ---------------- */
+.pitch { min-height: 0; overflow-y: auto; padding-bottom: 12px; }
+.pitch::-webkit-scrollbar { width: 8px; }
+.pitch::-webkit-scrollbar-thumb { background: #DCE1EC; border-radius: 999px; }
 
-.headings { min-width: 0; flex: 1 1 auto; }
-
-.eyebrow {
-  font-style: italic;
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: var(--blue);
-  margin-bottom: 2px;
+.hero {
+  background: var(--blue);
+  color: #fff;
+  border-radius: 0 0 26px 0;
+  padding: 28px 38px 26px;
+  margin: var(--top) 0 20px;
 }
-.eyebrow .num { font-weight: 800; }
-
-h1 {
-  margin: 0;
-  font-size: clamp(22px, 3vw, 38px);
+.hero h1 {
+  margin: 0 0 8px;
+  font-size: clamp(26px, 2.5vw, 40px);
   font-weight: 800;
-  line-height: 1.02;
+  line-height: 1.04;
   letter-spacing: -0.02em;
-  color: var(--blue);
 }
+.hero h1 .num { font-weight: 800; }
+.hero .sub { margin: 0; font-size: clamp(14px, 1.1vw, 17px); font-weight: 700; line-height: 1.35; }
 
-.tools {
+.hero .label { margin: 20px 0 8px; }
+.label {
+  font-size: 13.5px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.hero .label { color: #fff; }
+.hero .body p { margin: 0 0 10px; font-size: 14.5px; line-height: 1.5; font-weight: 500; }
+.hero .body p:last-child { margin-bottom: 0; }
+
+.cols { padding: 0 38px; }
+.cols .label { color: var(--ink); margin: 0 0 10px; }
+.cols ul { list-style: none; margin: 0 0 18px; padding: 0; }
+.cols li {
   display: flex;
-  align-items: center;
-  gap: 14px;
-  flex: none;
-  padding-bottom: 4px;
+  gap: 11px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.cols li img { width: 19px; height: 19px; flex: none; margin-top: 2px; }
+
+/* ---------------- Right: the prototype ---------------- */
+.show {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: var(--top) 38px 0 0;
 }
 
-.dots { display: flex; gap: 8px; }
-.dots button {
-  width: 10px; height: 10px; padding: 0;
-  border: 0; border-radius: 50%;
-  background: #CBD2E4;
-  cursor: pointer;
-  transition: background .18s ease, transform .18s ease;
-}
-.dots button:hover { background: #97A5C8; }
-.dots button[aria-current="true"] { background: var(--blue); transform: scale(1.35); }
-
-.pill {
-  font: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--blue);
-  background: #fff;
-  border: 2px solid var(--blue);
-  border-radius: 999px;
-  padding: 7px 16px;
-  cursor: pointer;
-  text-decoration: none;
-  white-space: nowrap;
-  transition: background .16s ease, color .16s ease;
-}
-.pill:hover { background: var(--blue); color: #fff; }
-.pill.ghost { border-color: var(--line); color: var(--ink-soft); }
-.pill.ghost:hover { border-color: var(--blue); background: #fff; color: var(--blue); }
-
-/* ---------------- Viewer ---------------- */
-.viewer {
+.frame-wrap {
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
-  padding: 4px 82px 18px;
-}
-.frame-wrap {
-  position: absolute;
-  inset: 4px 82px 18px;
-  border-radius: 18px;
+  border-radius: 16px;
   overflow: hidden;
-  border: 3px solid var(--blue);
   background: #0b0e13;
   transition: opacity .2s ease, transform .2s ease;
 }
 .frame-wrap iframe { width: 100%; height: 100%; border: 0; display: block; }
 
-.nav {
+.expand {
   position: absolute;
-  top: 50%;
+  right: 14px; bottom: 14px;
+  width: 44px; height: 44px;
+  border: 0; border-radius: 50%;
+  background: #10131A;
+  color: #fff;
+  cursor: pointer;
+  display: grid; place-items: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .3);
+  transition: transform .16s ease, background .16s ease;
+}
+.expand:hover { transform: scale(1.08); background: var(--blue); }
+.expand svg { width: 18px; height: 18px; }
+
+.meta {
+  flex: 0 0 auto;
+  background: var(--grey);
+  border-radius: 16px;
+  padding: 20px 24px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 22px;
+  align-items: start;
+}
+.meta .label { color: var(--ink); margin-bottom: 12px; display: block; }
+.meta .divider { border-left: 2px solid #E1E5EE; padding-left: 22px; }
+
+.tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.tags span {
+  background: var(--mint);
+  color: #0C1A16;
+  border-radius: 999px;
+  padding: 7px 15px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.effort-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.effort-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #fff;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 15px 6px 10px;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.effort-pill .dot {
+  width: 17px; height: 17px; border-radius: 50%;
+  background: #E8174A; color: #fff;
+  font-size: 12px; font-weight: 800;
+  display: grid; place-items: center;
+}
+.pads { display: flex; gap: 7px; }
+.pads img { width: 52px; height: auto; display: block; }
+
+/* ---------------- Bottom bar ---------------- */
+.logo {
+  position: fixed;
+  left: 50%; bottom: 16px;
+  transform: translateX(-50%);
+  height: 56px;
+}
+.logo img { height: 100%; width: auto; display: block; }
+
+.nav {
+  position: fixed;
+  bottom: 22px;
   width: 54px; height: 54px;
-  margin-top: -27px;
   border-radius: 50%;
   border: 0;
   background: var(--blue);
   color: #fff;
-  font-size: 27px;
-  font-weight: 700;
-  line-height: 1;
   cursor: pointer;
   display: grid;
   place-items: center;
@@ -150,180 +201,159 @@ h1 {
 }
 .nav:hover { background: var(--blue-dark); transform: scale(1.07); }
 .nav:active { transform: scale(0.97); }
-.nav.prev { left: 14px; padding-right: 3px; }
-.nav.next { right: 14px; padding-left: 3px; }
+.nav.prev { left: 24px; }
+.nav.next { right: 24px; }
+.nav svg { width: 22px; height: 22px; }
 
-/* ---------------- Notes ---------------- */
-.notes {
-  flex: 0 0 auto;
-  padding: 0 34px 24px;
-  display: grid;
-  grid-template-columns: 1fr 1fr 250px;
-  gap: 26px;
-  align-items: start;
-  transition: max-height .3s ease, opacity .22s ease, padding .3s ease;
-  max-height: 40vh;
-  overflow-y: auto;
-}
-
-.label {
-  display: block;
-  background: var(--mint);
-  border-radius: 9px;
-  padding: 11px 16px;
-  margin-bottom: 12px;
-  font-style: italic;
-  font-weight: 700;
-  font-size: 13.5px;
-  letter-spacing: .02em;
-  color: #0C1A16;
-  text-transform: uppercase;
-}
-
-.notes p {
-  margin: 0 0 9px;
-  font-size: 14px;
-  line-height: 1.55;
-  color: var(--ink-soft);
-}
-.notes p:last-child { margin-bottom: 0; }
-
-.pads { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-.pads img { width: 44px; height: auto; display: block; }
-
-.tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
-.tags span {
-  font-size: 12.5px; font-weight: 700;
-  padding: 6px 13px; border-radius: 999px;
-  background: var(--grey); color: var(--ink);
-}
-
-.shell.tight .notes {
-  max-height: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-  opacity: 0;
-  overflow: hidden;
-}
-
-@media (max-width: 940px) {
+@media (max-width: 1040px) {
   html, body { overflow: auto; }
-  .shell { height: auto; min-height: 100%; }
-  .bar { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .viewer { height: 58vh; padding: 4px 12px 14px; }
-  .frame-wrap { inset: 4px 12px 14px; }
-  .nav { width: 42px; height: 42px; margin-top: -21px; font-size: 21px; }
-  .nav.prev { left: 2px; } .nav.next { right: 2px; }
-  .notes { grid-template-columns: 1fr; max-height: none; }
+  .slide { height: auto; grid-template-columns: 1fr; gap: 0; padding-bottom: 110px; }
+  .hero { border-radius: 0 0 26px 26px; padding: 26px 22px; margin-top: 0; }
+  .cols { padding: 0 22px; }
+  .show { padding: 22px; height: auto; }
+  .frame-wrap { height: 62vh; }
+  .meta { grid-template-columns: 1fr; }
+  .meta .divider { border-left: 0; border-top: 2px solid #E1E5EE; padding: 18px 0 0; }
+  .nav.prev { left: 14px; } .nav.next { right: 14px; }
+  .logo { height: 44px; }
+
+  /* Stacked, the page scrolls under the bar, so give it a solid ground */
+  body::after {
+    content: "";
+    position: fixed; left: 0; right: 0; bottom: 0; height: 92px;
+    background: #fff;
+    box-shadow: 0 -6px 18px rgba(16, 19, 26, .08);
+    z-index: 1;
+  }
+  .logo, .nav { z-index: 2; }
 }
 </style>
 </head>
 <body>
 
-<div class="shell" id="shell">
+<div class="slide">
 
-  <header class="bar">
-    <div class="headings">
-      <div class="eyebrow"><span class="num" id="count">01/04</span> Gamification ideas</div>
-      <h1 id="title">—</h1>
+  <!-- The pitch -->
+  <section class="pitch">
+    <div class="hero">
+      <h1><span class="num" id="num">01</span>_<span id="title">—</span></h1>
+      <p class="sub" id="subtitle"></p>
+      <div class="label">The learning opportunity:</div>
+      <div class="body" id="opportunity"></div>
     </div>
-    <div class="tools">
-      <div class="dots" id="dots" role="tablist" aria-label="Choose a prototype"></div>
-      <button class="pill ghost" id="toggle" type="button" aria-expanded="true">Hide notes</button>
-    </div>
-  </header>
 
-  <div class="viewer">
-    <div class="frame-wrap" id="frameWrap">
-      <iframe id="frame" title="Prototype" allow="fullscreen"></iframe>
-    </div>
-    <button class="nav prev" id="prev" type="button" aria-label="Previous prototype">‹</button>
-    <button class="nav next" id="next" type="button" aria-label="Next prototype">›</button>
-  </div>
-
-  <section class="notes" id="notes">
-    <div>
-      <span class="label">// The idea:</span>
-      <div id="idea"></div>
-    </div>
-    <div>
-      <span class="label">// Why it works:</span>
-      <div id="why"></div>
-    </div>
-    <div>
-      <span class="label">// Effort:</span>
-      <div class="pads" id="pads" role="img"></div>
-      <div class="tags" id="tags"></div>
+    <div class="cols">
+      <div class="label">The idea:</div>
+      <ul id="idea"></ul>
+      <div class="label">Why it works:</div>
+      <ul id="why"></ul>
     </div>
   </section>
 
+  <!-- The prototype -->
+  <section class="show">
+    <div class="frame-wrap" id="frameWrap">
+      <iframe id="frame" title="Prototype" allow="fullscreen"></iframe>
+      <button class="expand" id="expand" type="button" title="Open full screen" aria-label="Open the prototype full screen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 3h6v6M21 3l-7 7M9 21H3v-6M3 21l7-7"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="meta">
+      <div>
+        <span class="label">Where we’d use it:</span>
+        <div class="tags" id="tags"></div>
+      </div>
+      <div class="divider">
+        <div class="effort-head">
+          <span class="label" style="margin:0">Effort:</span>
+          <span class="effort-pill"><span class="dot">!</span><span id="effortLabel"></span></span>
+        </div>
+        <div class="pads" id="pads" role="img"></div>
+      </div>
+    </div>
+  </section>
 </div>
+
+<a class="logo" href="./overview.html" title="All prototypes">
+  <img src="./assets/Hero-Header-Block-Logo.png" alt="Bundle">
+</a>
+
+<button class="nav prev" id="prev" type="button" aria-label="Previous prototype">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+</button>
+<button class="nav next" id="next" type="button" aria-label="Next prototype">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+</button>
 
 <script type="module">
 import { prototypes } from './shell/content.js';
 
 const frame = document.getElementById('frame');
 const frameWrap = document.getElementById('frameWrap');
-const titleEl = document.getElementById('title');
-const countEl = document.getElementById('count');
-const ideaEl = document.getElementById('idea');
-const whyEl = document.getElementById('why');
-const padsEl = document.getElementById('pads');
-const tagsEl = document.getElementById('tags');
-const dotsEl = document.getElementById('dots');
-const shell = document.getElementById('shell');
+const pitch = document.querySelector('.pitch');
 
 const MAX_EFFORT = 5;
-const pad = (n) => String(n).padStart(2, '0');
-let index = 0;
+/** What each rating means in plain words, shown next to the controllers. */
+const EFFORT_LABEL = [
+  'Easy',
+  'Straightforward',
+  'You’ll probably want some help',
+  'Specialist build',
+  'Call the game developers',
+];
 
-prototypes.forEach((p, i) => {
-  const b = document.createElement('button');
-  b.type = 'button';
-  b.title = p.label;
-  b.setAttribute('role', 'tab');
-  b.setAttribute('aria-label', p.title);
-  b.addEventListener('click', () => go(i));
-  dotsEl.append(b);
-});
+const pad = (n) => String(n).padStart(2, '0');
+const bullets = (host, lines, icon) => host.replaceChildren(...lines.map((text) => {
+  const li = document.createElement('li');
+  const img = document.createElement('img');
+  img.src = icon;
+  img.alt = '';
+  const span = document.createElement('span');
+  span.textContent = text;
+  li.append(img, span);
+  return li;
+}));
+
+let index = 0;
 
 function render(i) {
   const p = prototypes[i];
 
-  titleEl.textContent = p.title;
-  countEl.textContent = `${pad(i + 1)}/${pad(prototypes.length)}`;
-  const paragraphs = (value) => [].concat(value).map((text) => {
-    const node = document.createElement('p');
-    node.textContent = text;
-    return node;
-  });
-  ideaEl.replaceChildren(...paragraphs(p.idea));
-
-  whyEl.replaceChildren(...p.why.map((text) => {
+  document.getElementById('num').textContent = pad(i + 1);
+  document.getElementById('title').textContent = p.title;
+  document.getElementById('subtitle').textContent = p.subtitle ?? '';
+  document.getElementById('opportunity').replaceChildren(...[].concat(p.opportunity ?? []).map((text) => {
     const node = document.createElement('p');
     node.textContent = text;
     return node;
   }));
 
-  padsEl.setAttribute('aria-label', `Effort: ${p.effort} out of ${MAX_EFFORT}`);
-  padsEl.replaceChildren(...Array.from({ length: MAX_EFFORT }, (_, n) => {
+  bullets(document.getElementById('idea'), [].concat(p.idea), './assets/idea_icon.png');
+  bullets(document.getElementById('why'), [].concat(p.why), './assets/carbon_gamification.png');
+
+  document.getElementById('tags').replaceChildren(...(p.tags ?? []).map((t) => {
+    const span = document.createElement('span');
+    span.textContent = t;
+    return span;
+  }));
+
+  document.getElementById('effortLabel').textContent = EFFORT_LABEL[p.effort - 1] ?? '';
+  const pads = document.getElementById('pads');
+  pads.setAttribute('aria-label', `Effort: ${p.effort} out of ${MAX_EFFORT}`);
+  pads.replaceChildren(...Array.from({ length: MAX_EFFORT }, (_, n) => {
     const img = document.createElement('img');
     img.src = n < p.effort ? './assets/controller_full.png' : './assets/controller_empty.png';
     img.alt = '';
     return img;
   }));
 
-  // Optional topic tags — fill in `tags` in shell/content.js to show them
-  tagsEl.replaceChildren(...(p.tags ?? []).map((t) => {
-    const span = document.createElement('span');
-    span.textContent = t;
-    return span;
-  }));
-
   frame.title = p.title;
   frame.src = p.url;
+  pitch.scrollTop = 0;
 
-  [...dotsEl.children].forEach((d, n) => d.setAttribute('aria-current', String(n === i)));
   history.replaceState(null, '', `#${p.id}`);
 }
 
@@ -348,18 +378,12 @@ function go(next, dir = next > index ? 1 : -1) {
 
 document.getElementById('prev').addEventListener('click', () => go(index - 1, -1));
 document.getElementById('next').addEventListener('click', () => go(index + 1, 1));
+document.getElementById('expand').addEventListener('click', () => frameWrap.requestFullscreen?.());
 
 document.addEventListener('keydown', (e) => {
   if (e.target.closest('input, textarea')) return;
   if (e.key === 'ArrowLeft') go(index - 1, -1);
   if (e.key === 'ArrowRight') go(index + 1, 1);
-});
-
-const toggle = document.getElementById('toggle');
-toggle.addEventListener('click', () => {
-  const tight = shell.classList.toggle('tight');
-  toggle.textContent = tight ? 'Show notes' : 'Hide notes';
-  toggle.setAttribute('aria-expanded', String(!tight));
 });
 
 // Deep link support: index.html#photo-hunt opens that one directly.

@@ -2,7 +2,7 @@
 
 **Live: <https://123arnasxyz.github.io/gamification-prototypes/>**
 
-Nine small interactive learning mechanics built on Three.js, designed to be dropped into a
+Fourteen small interactive learning mechanics built on Three.js, designed to be dropped into a
 WordPress page as an `<iframe>`. There is **no build step** — the browser loads ES modules
 directly and Three.js comes from a CDN via an import map.
 
@@ -12,7 +12,7 @@ publishes. Deep links work too — `#photo-hunt` on the end of the URL opens tha
 ```
 serve.py                       dev server with caching disabled
 index.html                     carousel shell — one prototype at a time, with its write-up
-overview.html                  grid view of all four
+overview.html                  grid view of them all
 assets/
   controller_full.png          effort rating artwork
   controller_empty.png
@@ -34,6 +34,11 @@ prototypes/
   07-build-your-answer/        tone x action, each part scored on its own
   08-progress-map/             level map where stages unlock only by succeeding
   09-consequences/             no feedback box; an overloaded box is crushed on the spot
+  10-hot-cold/                 every look reports how close it was, until the breach is found
+  11-earn-the-win/             a wrong answer hands back the same decision, with more help
+  12-onboarding-adventure/     walk the floor, find the stations, unlock the door
+  13-world-reacts/             the team react to each other, sometimes a week later
+  14-juggle/                   four measures that pull against each other all week
 ```
 
 Every prototype follows the same shape: `index.html` holds the DOM overlay, `main.js` builds the
@@ -153,7 +158,12 @@ Two alternatives, both fine:
 | `07-build-your-answer` | The tone and action options with their scores, lines and feedback, plus the verdict and customer-reply rules |
 | `08-progress-map` | The stages in order, each with its question, options and the explanation shown on a wrong answer |
 | `09-consequences` | The three boxes (weight and how much each can carry), what you see when one is crushed, and what the driver says at the other end |
-| `shell/content.js` | The title, "the idea", "why it works" and the 1–5 effort rating shown around each prototype in the carousel |
+| `10-hot-cold` | The candidate hiding places on the desk, the proximity words and their distance bands, and the wording for each attempt band |
+| `11-earn-the-win` | The two decisions, each option's consequence and feedback, and the two levels of support per step |
+| `12-onboarding-adventure` | The stations along the floor and what each one says, the hidden bonus, and the ending |
+| `13-world-reacts` | The four team members, the three decisions and what each option does to the relationships between everyone else, the messages (immediate and delayed), and the endings |
+| `14-juggle` | The four measures and their limits, the four decisions and what each option moves, the threshold events and the endings |
+| `shell/content.js` | Every word in the carousel around each prototype: title, subtitle, "the learning opportunity", "the idea", "why it works", the topic tags and the 1–5 effort rating. Taken from the *23 gamification ideas for L&D teams* document |
 
 A few rules the code depends on:
 

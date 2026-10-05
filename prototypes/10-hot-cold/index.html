@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hot and Cold — Clear Desk Check</title>
+<!-- ?v= bumps the cache when the shared styling changes -->
+<link rel="stylesheet" href="../../shared/style.css?v=2">
+<style>
+  /* The proximity word is the whole mechanic, so it gets its own chip
+     next to the attempts counter rather than a passing toast only. */
+  .reading {
+    display: flex; align-items: baseline; gap: 10px;
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--r-sm); padding: 7px 14px; min-width: 150px;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    box-shadow: var(--shadow-sm);
+    opacity: 0; transition: opacity .2s ease;
+  }
+  .reading.on { opacity: 1; }
+  .reading .word { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
+  .reading .note { font-size: 12.5px; color: var(--ink-dim); font-weight: 600; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<div class="stage" id="stage"></div>
+
+<div class="ui-layer">
+  <div class="topbar" style="align-items:flex-start">
+    <div class="panel" style="max-width:min(420px,52vw)">
+      <div class="eyebrow" id="eyebrow"></div>
+      <div class="title" id="title"></div>
+    </div>
+    <div class="spacer"></div>
+    <div style="display:flex;flex-direction:column;gap:9px;align-items:flex-end">
+      <div class="stats" id="stats"></div>
+      <div class="reading" id="reading" aria-live="polite">
+        <span class="word" id="word"></span>
+        <span class="note" id="note"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="dock">
+    <div class="hint" id="hint"></div>
+    <div style="flex:1"></div>
+    <button class="btn ghost clickable" id="restart" type="button">Restart</button>
+  </div>
+</div>
+
+<div class="loading" id="loading">Walking up to the desk…</div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>

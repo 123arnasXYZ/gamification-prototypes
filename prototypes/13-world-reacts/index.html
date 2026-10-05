@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Let the World React Without You — Team Channel</title>
+<!-- ?v= bumps the cache when the shared styling changes -->
+<link rel="stylesheet" href="../../shared/style.css?v=2">
+<style>
+  /* ============================================================
+     The prototype is a team chat workspace, because the channel is
+     where the consequences land. The 3D scene behind it is the
+     office the whole thing is happening in.
+     ============================================================ */
+  .work {
+    position: absolute; inset: 96px 14px 14px;   /* JS sets the top to clear the title card */
+    display: grid; grid-template-columns: 228px 1fr;
+    border-radius: 16px; overflow: hidden;
+    box-shadow: 0 22px 60px rgba(8, 12, 20, .45);
+    background: #fff;
+  }
+
+  /* ---- sidebar ---- */
+  .side { background: #1F2430; color: #D7DCE6; display: flex; flex-direction: column; min-height: 0; }
+  .side .ws { padding: 13px 15px 11px; border-bottom: 1px solid rgba(255,255,255,.1); font-weight: 800; font-size: 14.5px; color: #fff; }
+  .side .grp { padding: 13px 15px 3px; font-size: 10px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: #8C94A6; }
+  .side .chan { margin: 2px 8px; padding: 6px 8px; border-radius: 7px; font-size: 13.5px; font-weight: 700; color: #fff; background: var(--blue); }
+  .side .member { display: flex; align-items: center; gap: 9px; padding: 6px 15px; }
+  .side .member .nm { font-size: 13px; font-weight: 700; color: #E8ECF4; line-height: 1.2; }
+  .side .member .st { font-size: 10.5px; font-weight: 600; color: #8C94A6; }
+  .side .member.bad .st { color: #FF8BA6; }
+  .side .member.warn .st { color: #F4C664; }
+  .side .member.good .st { color: #7FE9C2; }
+  .side .you { margin-top: auto; border-top: 1px solid rgba(255,255,255,.1); padding-top: 10px; padding-bottom: 10px; }
+
+  /* ---- avatars ---- */
+  .av {
+    flex: none; width: 30px; height: 30px; border-radius: 9px;
+    display: grid; place-items: center;
+    font-size: 12.5px; font-weight: 800; color: #fff;
+  }
+  .av.lg { width: 34px; height: 34px; border-radius: 10px; font-size: 13.5px; }
+
+  /* ---- channel ---- */
+  .chat { display: flex; flex-direction: column; min-height: 0; background: #fff; }
+  .chat .head {
+    flex: none; padding: 10px 18px; border-bottom: 1px solid var(--line);
+    font-weight: 800; font-size: 15px; color: var(--ink);
+  }
+  .chat .head span { font-weight: 600; font-size: 12.5px; color: var(--ink-dim); margin-left: 8px; }
+
+  .log {
+    flex: 1 1 auto; min-height: 0; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 12px 18px 8px; gap: 11px;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 42px);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 42px);
+  }
+  .post { display: flex; gap: 10px; align-items: flex-start; animation: post-in .3s cubic-bezier(.2,.9,.3,1) both; transition: opacity .35s ease; }
+  .post .who { font-size: 13.5px; font-weight: 800; color: var(--ink); }
+  .post .when { font-size: 11px; font-weight: 600; color: var(--ink-dim); margin-left: 7px; }
+  .post .text { font-size: 13.5px; line-height: 1.45; color: var(--ink); margin-top: 1px; }
+  /* Older posts fade up the channel rather than overflowing it */
+  .post:nth-last-child(2) { opacity: .64; }
+  .post:nth-last-child(3) { opacity: .42; }
+  .post:nth-last-child(n+4) { opacity: .24; }
+  .post.out { opacity: 0 !important; }
+  @keyframes post-in { from { opacity: 0; transform: translateY(8px); } }
+
+  .day { display: flex; align-items: center; gap: 10px; font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-dim); }
+  .day::before, .day::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+  /* ---- the decision, in the place the message box would be ---- */
+  .compose { flex: none; border-top: 1px solid var(--line); padding: 12px 18px 14px; background: var(--grey); }
+  .compose .dm { display: flex; align-items: center; gap: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--blue); margin-bottom: 7px; }
+  .compose .brief { font-size: 14px; line-height: 1.4; color: var(--ink); margin-bottom: 10px; }
+  .options { display: flex; gap: 8px; }
+  .opt {
+    flex: 1 1 0; min-width: 0;
+    font: inherit; font-size: 13px; font-weight: 600; text-align: left; line-height: 1.35;
+    padding: 10px 12px; border-radius: 10px;
+    border: 2px solid var(--line-2); background: #fff; color: var(--ink);
+    cursor: pointer; transition: border-color .14s, transform .12s;
+  }
+  .opt:hover:not(:disabled) { border-color: var(--blue); transform: translateY(-1px); }
+  .opt:disabled { cursor: default; opacity: .5; }
+
+  .recap h2 { color: var(--blue); font-size: 19px; margin: 0 0 6px; line-height: 1.1; }
+  .recap .line { font-size: 13.5px; color: var(--ink); margin: 0 0 10px; }
+  .recap .beat { border-left: 3px solid var(--line-2); padding: 2px 0 2px 11px; margin-bottom: 5px; font-size: 13px; color: var(--ink-dim); }
+  .recap .beat b { color: var(--ink); }
+  .recap .point { font-size: 12.5px; color: var(--ink); font-style: italic; margin: 10px 0; line-height: 1.45; }
+
+  /* Too narrow for a sidebar: it becomes a single strip of avatars
+     along the top, and the status moves into the name's colour. */
+  @media (max-width: 820px) {
+    .work { inset: 96px 10px 10px; grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    .side { flex-direction: row; align-items: center; gap: 2px; padding: 6px 8px; overflow-x: auto; }
+    .side .ws, .side .grp, .side .chan { display: none; }
+    .side #members { display: flex; align-items: center; gap: 2px; }
+    .side .member { padding: 4px 8px; }
+    .side .member .st { display: none; }
+    .side .member.bad .nm { color: #FF8BA6; }
+    .side .member.warn .nm { color: #F4C664; }
+    .side .member.good .nm { color: #7FE9C2; }
+    .side .you { margin: 0 0 0 auto; border: 0; padding: 4px 8px; }
+    .av { width: 26px; height: 26px; border-radius: 8px; font-size: 11.5px; }
+    .options { flex-direction: column; }
+    .log { padding: 10px 14px 6px; gap: 9px; }
+    .compose { padding: 10px 14px 12px; }
+  }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<div class="stage" id="stage"></div>
+
+<div class="ui-layer">
+  <div class="topbar" style="align-items:flex-start">
+    <div class="panel" style="max-width:min(430px,52vw)">
+      <div class="eyebrow" id="eyebrow"></div>
+      <div class="title" id="title"></div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn ghost clickable" id="restart" type="button">Restart</button>
+  </div>
+</div>
+
+<div class="work" id="work">
+  <aside class="side">
+    <div class="ws" id="ws"></div>
+    <div class="grp" id="grpChannels"></div>
+    <div class="chan" id="chan"></div>
+    <div class="grp" id="grpPeople"></div>
+    <div id="members"></div>
+    <div class="member you" id="me"></div>
+  </aside>
+
+  <section class="chat">
+    <div class="head" id="chatHead"></div>
+    <div class="log" id="log"></div>
+    <div class="compose" id="compose"></div>
+  </section>
+</div>
+
+<div class="loading" id="loading">Opening the team channel…</div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Turn Your Onboarding Into an Adventure — Corridor</title>
+<!-- ?v= bumps the cache when the shared styling changes -->
+<link rel="stylesheet" href="../../shared/style.css?v=2">
+<style>
+  /* The walk buttons live at the bottom, so keep toasts above them */
+  .toasts { bottom: 104px; }
+
+  .card { width: min(520px, 94vw); margin: 0 auto; animation: rise .28s cubic-bezier(.2,.9,.3,1) both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+  .card h2 { margin: 2px 0 8px; font-size: 19px; color: var(--blue); }
+  .card p { margin: 0 0 7px; font-size: 14px; color: var(--ink-dim); line-height: 1.5; }
+  .card .actions { display: flex; gap: 10px; margin-top: 12px; }
+
+  .walk { display: flex; gap: 10px; }
+  .walk .btn { min-width: 86px; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<div class="stage" id="stage"></div>
+
+<div class="ui-layer">
+  <div class="topbar" style="align-items:flex-start">
+    <div class="panel">
+      <div class="eyebrow" id="eyebrow"></div>
+      <div class="title" id="title"></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="stats" id="stats"></div>
+  </div>
+
+  <div style="flex:1"></div>
+
+  <div class="panel clickable card" id="card" hidden></div>
+
+  <div class="dock" style="margin-top:10px">
+    <div class="walk">
+      <button class="btn clickable" id="left" type="button"></button>
+      <button class="btn clickable" id="right" type="button"></button>
+    </div>
+    <div class="hint" id="hint"></div>
+    <div style="flex:1"></div>
+    <button class="btn ghost clickable" id="restart" type="button"></button>
+  </div>
+</div>
+
+<div class="loading" id="loading">Opening the building…</div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>

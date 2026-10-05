@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Give Learners Something to Juggle — Team Week</title>
+<!-- ?v= bumps the cache when the shared styling changes -->
+<link rel="stylesheet" href="../../shared/style.css?v=2">
+<style>
+  /* "What just moved" sits in the strip beside the Restart button */
+  .toasts { left: auto; right: 18px; bottom: auto; top: 58px; transform: none; align-items: flex-end; max-width: min(420px, 48vw); }
+
+  /* The decision is a wide, shallow bar: the bars above it stay in view */
+  .brief {
+    width: 100%;
+    margin: 0;
+    animation: rise .3s cubic-bezier(.2,.9,.3,1) both;
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+
+  .brief .head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+  .brief .q { font-size: 14.5px; color: var(--ink); margin: 0; line-height: 1.4; flex: 1 1 320px; min-width: 0; }
+
+  .options { display: flex; gap: 8px; align-items: stretch; }
+  .opt {
+    flex: 1 1 0; min-width: 0;
+    font: inherit; font-size: 13.5px; font-weight: 600; text-align: left;
+    padding: 10px 13px; border-radius: var(--r-sm);
+    border: 2px solid var(--line-2); background: #fff; color: var(--ink);
+    cursor: pointer; transition: border-color .14s, background .14s;
+    line-height: 1.35; overflow-wrap: anywhere;
+  }
+  .opt:hover:not(:disabled) { border-color: var(--blue); }
+  .opt:disabled { cursor: default; opacity: .5; }
+
+  .moved { margin-top: 8px; font-size: 12.5px; color: var(--ink-dim); min-height: 16px; }
+  .moved b { color: var(--ink); }
+
+  /* Narrow frames cannot hold three options side by side */
+  @media (max-width: 760px) {
+    .options { flex-direction: column; }
+    .opt { flex: none; }
+  }
+
+  .outcome { max-width: 640px; margin: 0 auto; }
+  .outcome h2 { color: var(--blue); font-size: 20px; margin: 2px 0 6px; line-height: 1.1; }
+  .outcome .line { font-size: 14px; color: var(--ink); margin: 0 0 11px; }
+  .outcome .sub { font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; font-weight: 700; color: var(--ink-dim); margin: 0 0 6px; }
+  .outcome .beat { border-left: 3px solid var(--danger); padding: 2px 0 2px 11px; margin-bottom: 6px; font-size: 13px; color: var(--ink-dim); }
+  .outcome .beat b { color: var(--ink); }
+  .outcome .beat.none { border-left-color: var(--good); }
+  .outcome .point { font-size: 13px; color: var(--ink); font-style: italic; margin: 11px 0 11px; line-height: 1.45; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<div class="stage" id="stage"></div>
+
+<div class="ui-layer">
+  <div class="topbar" style="align-items:flex-start">
+    <div class="panel">
+      <div class="eyebrow" id="eyebrow"></div>
+      <div class="title" id="title"></div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn ghost clickable" id="restart" type="button">Restart</button>
+  </div>
+
+  <div style="flex:1"></div>
+
+  <div class="dock">
+    <div class="hint" id="hint"></div>
+  </div>
+
+  <div class="panel clickable" id="brief" style="width:min(1040px,100%);margin:0 auto"></div>
+</div>
+
+<div class="loading" id="loading">Walking into the team area…</div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>
