@@ -31,6 +31,23 @@
 
 * { box-sizing: border-box; }
 
+/* One scrollbar style for the whole shell: a slim rounded thumb and no
+   stepper arrows, so nothing square turns up beside a rounded panel. */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: #CBD2E4;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover { background: #97A5C8; background-clip: padding-box; }
+::-webkit-scrollbar-button,
+::-webkit-scrollbar-button:single-button,
+::-webkit-scrollbar-button:double-button { display: none; width: 0; height: 0; }
+::-webkit-scrollbar-corner { background: transparent; }
+html { scrollbar-width: thin; scrollbar-color: #CBD2E4 transparent; }
+
 html, body {
   height: 100%;
   margin: 0;
@@ -169,10 +186,14 @@ html, body {
 }
 .effort-pill .dot {
   width: 17px; height: 17px; border-radius: 50%;
-  background: #E8174A; color: #fff;
+  color: #fff;
   font-size: 12px; font-weight: 800;
   display: grid; place-items: center;
 }
+/* Only the harder ratings carry a warning, and it goes amber before red */
+.effort-pill .dot.warn  { background: #F0B429; }
+.effort-pill .dot.alert { background: #E8174A; }
+.effort-pill .sep { color: #C3CADA; font-weight: 600; margin: 0 1px; }
 .pads { display: flex; gap: 7px; }
 .pads img { width: 52px; height: auto; display: block; }
 
@@ -204,6 +225,140 @@ html, body {
 .nav.prev { left: 24px; }
 .nav.next { right: 24px; }
 .nav svg { width: 22px; height: 22px; }
+
+/* ---------------- All-prototypes lightbox ---------------- */
+/* A class that sets `display` beats the browser's own rule for the
+   hidden attribute, so say it explicitly or the sheet shows on load. */
+[hidden] { display: none !important; }
+
+.view-all {
+  display: block;
+  margin: 10px auto 0;
+  background: none; border: 0;
+  font: inherit; font-size: 13.5px; font-weight: 700;
+  color: var(--blue);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.view-all:hover { color: var(--blue-dark); }
+
+.scrim {
+  position: fixed; inset: 0; z-index: 30;
+  background: rgba(16, 19, 26, .55);
+  display: grid; place-items: center;
+  padding: 20px 18px;
+  animation: scrim-in .18s ease both;
+}
+@keyframes scrim-in { from { opacity: 0; } }
+
+.sheet {
+  position: relative;
+  width: min(1480px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 20px;
+  padding: 26px 30px 30px;
+  box-shadow: 0 30px 80px rgba(8, 12, 20, .4);
+  animation: sheet-in .22s cubic-bezier(.2,.9,.3,1) both;
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #CBD2E4 transparent;
+}
+/* The bar rides inside the sheet, short of the corners, so the rounding
+   still reads along the right-hand edge. */
+.sheet::-webkit-scrollbar { width: 14px; }
+.sheet::-webkit-scrollbar-track { background: transparent; margin: 18px 0; }
+.sheet::-webkit-scrollbar-thumb {
+  background: #CBD2E4;
+  border: 4px solid transparent;      /* transparent border + clip = an inset bar */
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+.sheet::-webkit-scrollbar-thumb:hover { background: #97A5C8; background-clip: padding-box; }
+/* No stepper arrows at either end — just the bar. Chromium draws these
+   per direction, so each one has to be zeroed by name. */
+.sheet::-webkit-scrollbar-button,
+.sheet::-webkit-scrollbar-button:single-button,
+.sheet::-webkit-scrollbar-button:double-button,
+.sheet::-webkit-scrollbar-button:vertical:start:decrement,
+.sheet::-webkit-scrollbar-button:vertical:end:increment,
+.sheet::-webkit-scrollbar-button:vertical:start:increment,
+.sheet::-webkit-scrollbar-button:vertical:end:decrement {
+  display: none;
+  width: 0; height: 0;
+  background: transparent;
+  background-image: none;
+}
+.sheet::-webkit-scrollbar-corner { background: transparent; }
+.sheet::-webkit-resizer { display: none; }
+@keyframes sheet-in { from { opacity: 0; transform: translateY(14px); } }
+
+.sheet .top { display: flex; align-items: flex-start; gap: 20px; flex-wrap: wrap; }
+.sheet h2 { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); }
+.sheet .sub { margin: 2px 0 0; font-size: 13.5px; color: var(--ink-soft); }
+.sheet .legend { margin-left: auto; font-size: 12.5px; color: var(--ink-soft); text-align: right; white-space: nowrap; }
+
+.sheet .close {
+  flex: none;
+  width: 36px; height: 36px; border: 0; border-radius: 50%;
+  background: var(--blue); color: #fff;
+  font-size: 18px; line-height: 1; cursor: pointer;
+  display: grid; place-items: center;
+  transition: background .16s ease, transform .16s ease;
+}
+.sheet .close:hover { background: var(--blue-dark); transform: scale(1.06); }
+
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 22px; }
+.filters button {
+  font: inherit; font-size: 13.5px; font-weight: 600;
+  padding: 7px 16px; border-radius: 999px;
+  border: 1.5px solid var(--line); background: #fff; color: var(--ink);
+  cursor: pointer; transition: border-color .14s, background .14s, color .14s;
+}
+.filters button:hover { border-color: var(--blue); }
+.filters button[aria-pressed="true"] { background: #F1304F; border-color: #F1304F; color: #fff; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+.card-idea {
+  display: flex; flex-direction: column; gap: 12px;
+  text-align: left; font: inherit;
+  padding: 14px 16px 16px;
+  border: 1.5px solid var(--line); border-radius: 14px;
+  background: #fff; cursor: pointer;
+  transition: border-color .14s, transform .14s, box-shadow .14s;
+}
+.card-idea:hover { border-color: var(--blue); transform: translateY(-2px); box-shadow: 0 10px 24px rgba(16,19,26,.07); }
+.card-idea[aria-current="true"] { border-color: var(--blue); border-width: 2px; }
+.card-idea .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.card-idea .n {
+  font-size: 12.5px; font-weight: 800; color: #fff;
+  background: var(--blue); border-radius: 999px; padding: 3px 11px;
+}
+.card-idea .mini { display: flex; gap: 3px; }
+.card-idea .mini img { width: 22px; height: auto; display: block; }
+.card-idea h3 { margin: 0; font-size: 16px; font-weight: 800; line-height: 1.2; color: var(--blue); }
+
+/* Ideas with nothing to open yet still appear — they are part of the set */
+.card-idea.soon { cursor: default; border-style: dashed; }
+.card-idea.soon:hover { border-color: var(--line); transform: none; box-shadow: none; }
+.card-idea.soon h3 { color: var(--ink-soft); }
+.card-idea.soon .n { background: #B9BFCB; }
+.card-idea .soon-note { font-size: 11.5px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .05em; }
+
+.sheet .none { font-size: 14px; color: var(--ink-soft); padding: 20px 2px; }
+
+@media (max-width: 1040px) {
+  .sheet .legend { display: none; }
+}
+
+@media (max-width: 760px) {
+  .scrim { padding: 10px; }
+  .sheet { padding: 20px 18px 22px; }
+  .sheet .legend { display: none; }
+  .sheet .close { margin-left: auto; }   /* with the legend gone, keep it on the right */
+}
 
 @media (max-width: 1040px) {
   html, body { overflow: auto; }
@@ -274,7 +429,25 @@ html, body {
         <div class="pads" id="pads" role="img"></div>
       </div>
     </div>
+
+    <button class="view-all" id="viewAll" type="button">View all prototypes</button>
   </section>
+</div>
+
+<div class="scrim" id="lightbox" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="top">
+      <div>
+        <h2 id="sheetTitle"></h2>
+        <p class="sub">Jump straight to any idea</p>
+      </div>
+      <p class="legend" id="legend"></p>
+      <button class="close" id="closeSheet" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="filters" id="filters"></div>
+    <div class="cards" id="cards"></div>
+    <p class="none" id="noneFound" hidden></p>
+  </div>
 </div>
 
 <a class="logo" href="./overview.html" title="All prototypes">
@@ -289,7 +462,7 @@ html, body {
 </button>
 
 <script type="module">
-import { prototypes } from './shell/content.js';
+import { prototypes, ideas, topics } from './shell/content.js';
 
 const frame = document.getElementById('frame');
 const frameWrap = document.getElementById('frameWrap');
@@ -297,13 +470,49 @@ const pitch = document.querySelector('.pitch');
 
 const MAX_EFFORT = 5;
 /** What each rating means in plain words, shown next to the controllers. */
-const EFFORT_LABEL = [
-  'Easy',
-  'Straightforward',
-  'You’ll probably want some help',
-  'Specialist build',
-  'Call the game developers',
+/* The 1-5 rating: what it is called, and whether it carries a warning.
+   `warn` is amber, `alert` is red, and the first two carry nothing. */
+const EFFORT = [
+  { label: 'Easy | 1 day', level: null },
+  { label: 'Straightforward', level: null },
+  { label: 'You’ll probably want some help', level: 'warn' },
+  { label: 'Specialist build', level: 'alert' },
+  { label: 'Call the game developers', level: 'alert' },
 ];
+const EFFORT_LABEL = EFFORT.map((e) => e.label);
+
+/** The pill next to "Effort:" — the warning dot only shows when the
+    rating has one, and "Easy | 1 day" keeps its divider thin. */
+function renderEffortPill(effort) {
+  const pill = document.querySelector('.effort-pill');
+  const { label, level } = EFFORT[effort - 1] ?? EFFORT[0];
+  pill.replaceChildren();
+
+  if (level) {
+    const dot = document.createElement('span');
+    dot.className = `dot ${level}`;
+    dot.setAttribute('aria-hidden', 'true');
+    dot.textContent = '!';
+    pill.append(dot);
+  } else {
+    pill.style.paddingLeft = '';
+  }
+  pill.style.paddingLeft = level ? '' : '15px';
+
+  const text = document.createElement('span');
+  text.id = 'effortLabel';
+  label.split(' | ').forEach((part, i) => {
+    if (i) {
+      const sep = document.createElement('span');
+      sep.className = 'sep';
+      sep.textContent = '|';
+      text.append(sep);
+    }
+    text.append(document.createTextNode(i ? ` ${part}` : `${part} `));
+  });
+  if (!label.includes(' | ')) text.textContent = label;
+  pill.append(text);
+}
 
 const pad = (n) => String(n).padStart(2, '0');
 const bullets = (host, lines, icon) => host.replaceChildren(...lines.map((text) => {
@@ -322,7 +531,7 @@ let index = 0;
 function render(i) {
   const p = prototypes[i];
 
-  document.getElementById('num').textContent = pad(i + 1);
+  document.getElementById('num').textContent = pad(p.n ?? i + 1);
   document.getElementById('title').textContent = p.title;
   document.getElementById('subtitle').textContent = p.subtitle ?? '';
   document.getElementById('opportunity').replaceChildren(...[].concat(p.opportunity ?? []).map((text) => {
@@ -340,7 +549,7 @@ function render(i) {
     return span;
   }));
 
-  document.getElementById('effortLabel').textContent = EFFORT_LABEL[p.effort - 1] ?? '';
+  renderEffortPill(p.effort);
   const pads = document.getElementById('pads');
   pads.setAttribute('aria-label', `Effort: ${p.effort} out of ${MAX_EFFORT}`);
   pads.replaceChildren(...Array.from({ length: MAX_EFFORT }, (_, n) => {
@@ -382,9 +591,121 @@ document.getElementById('expand').addEventListener('click', () => frameWrap.requ
 
 document.addEventListener('keydown', (e) => {
   if (e.target.closest('input, textarea')) return;
+  if (e.key === 'Escape' && !lightbox.hidden) return closeSheet();
+  if (!lightbox.hidden) return;                 // arrows drive the carousel, not the sheet
   if (e.key === 'ArrowLeft') go(index - 1, -1);
   if (e.key === 'ArrowRight') go(index + 1, 1);
 });
+
+/* ============================================================
+   The "view all" sheet: every idea in the deck, filtered by topic.
+   Ideas that have no prototype yet are still listed — the set is
+   the point — they just have nothing to open.
+   ============================================================ */
+const lightbox = document.getElementById('lightbox');
+const cardsEl = document.getElementById('cards');
+const filtersEl = document.getElementById('filters');
+const noneEl = document.getElementById('noneFound');
+let filter = null;                              // null = everything
+
+document.getElementById('sheetTitle').textContent = `All ${ideas.length} prototypes`;
+document.getElementById('legend').textContent =
+  `Controllers show effort — from “${EFFORT_LABEL[0]}” to “${EFFORT_LABEL[MAX_EFFORT - 1]}”`;
+
+function renderFilters() {
+  const chip = (label, value) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = label;
+    b.setAttribute('aria-pressed', String(filter === value));
+    b.addEventListener('click', () => { filter = value; renderFilters(); renderCards(); });
+    return b;
+  };
+  filtersEl.replaceChildren(chip('All', null), ...topics.map((t) => chip(t, t)));
+}
+
+function renderCards() {
+  const shown = ideas.filter((idea) => !filter || idea.topics.includes(filter));
+  noneEl.hidden = shown.length > 0;
+  if (!shown.length) noneEl.textContent = `Nothing tagged “${filter}” yet.`;
+
+  cardsEl.replaceChildren(...shown.map((idea) => {
+    const built = idea.prototype && prototypes.some((p) => p.id === idea.prototype);
+    const card = document.createElement(built ? 'button' : 'div');
+    card.className = 'card-idea' + (built ? '' : ' soon');
+    if (built) {
+      card.type = 'button';
+      card.setAttribute('aria-current', String(prototypes[index].id === idea.prototype));
+      card.addEventListener('click', () => {
+        closeSheet();
+        go(prototypes.findIndex((p) => p.id === idea.prototype));
+      });
+    }
+
+    const row = document.createElement('div');
+    row.className = 'row';
+    const n = document.createElement('span');
+    n.className = 'n';
+    n.textContent = `${pad(idea.n)}/${pad(ideas.length)}`;
+    const mini = document.createElement('div');
+    mini.className = 'mini';
+    mini.setAttribute('role', 'img');
+    mini.setAttribute('aria-label', `Effort: ${idea.effort} out of ${MAX_EFFORT}`);
+    mini.append(...Array.from({ length: MAX_EFFORT }, (_, k) => {
+      const img = document.createElement('img');
+      img.src = k < idea.effort ? './assets/controller_full.png' : './assets/controller_empty.png';
+      img.alt = '';
+      return img;
+    }));
+    row.append(n, mini);
+
+    const h3 = document.createElement('h3');
+    h3.textContent = idea.title;
+    card.append(row, h3);
+
+    if (!built) {
+      const note = document.createElement('span');
+      note.className = 'soon-note';
+      note.textContent = 'No prototype yet';
+      card.append(note);
+    }
+    return card;
+  }));
+}
+
+function openSheet() {
+  filter = null;                      // always opens on the full set
+  renderFilters();
+  renderCards();
+  lightbox.hidden = false;
+  // Nothing should scroll behind the sheet — including the page itself,
+  // which has its own scrollbar once the layout stacks.
+  document.body.style.overflow = 'hidden';
+  holdHeight();
+  document.getElementById('closeSheet').focus();
+}
+
+/** Pin the sheet to the height the whole list needs, so filtering down
+    to three cards does not shrink the panel under the cursor. */
+function holdHeight() {
+  const sheet = document.querySelector('.sheet');
+  sheet.style.minHeight = '';
+  const full = sheet.getBoundingClientRect().height;
+  sheet.style.minHeight = `${Math.round(full)}px`;
+}
+
+function closeSheet() {
+  lightbox.hidden = true;
+  document.body.style.overflow = '';
+  document.querySelector('.sheet').style.minHeight = '';
+}
+
+// A resize changes how many cards fit per row, so take the height again
+window.addEventListener('resize', () => { if (!lightbox.hidden) holdHeight(); });
+
+document.getElementById('viewAll').addEventListener('click', openSheet);
+document.getElementById('closeSheet').addEventListener('click', closeSheet);
+lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeSheet(); });
 
 // Deep link support: index.html#photo-hunt opens that one directly.
 // Changing only the hash does not reload the page, so follow it live too

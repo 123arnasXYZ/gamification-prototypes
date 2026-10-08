@@ -165,7 +165,7 @@ code {
 </div>
 
 <script type="module">
-import { prototypes } from './shell/content.js';
+import { prototypes, ideas } from './shell/content.js';
 
 const grid = document.getElementById('grid');
 const pad = (n) => String(n).padStart(2, '0');
@@ -179,7 +179,7 @@ grid.replaceChildren(...prototypes.map((p, i) => {
     `<img src="./assets/controller_${n < p.effort ? 'full' : 'empty'}.png" alt="">`).join('');
 
   card.innerHTML = `
-    <div class="num">${pad(i + 1)}/${pad(prototypes.length)}</div>
+    <div class="num">${pad(p.n ?? i + 1)}/${pad(ideas.length)}</div>
     <h2></h2>
     <span class="label">// The idea:</span>
     <p></p>

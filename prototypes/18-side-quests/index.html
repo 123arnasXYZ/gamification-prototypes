@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Add Side Quests — Opening Shift</title>
+<!-- ?v= bumps the cache when the shared styling changes -->
+<link rel="stylesheet" href="../../shared/style.css?v=2">
+<style>
+  /* The walk buttons and the hint live at the bottom, so keep toasts clear of them */
+  .toasts { bottom: 112px; }
+
+  .trackers { display: flex; flex-direction: column; gap: 9px; align-items: flex-end; }
+
+  .tally {
+    font-size: 11.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--ink-dim); background: var(--panel);
+    border: 1px solid var(--line); border-radius: 999px; padding: 6px 13px;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Three empty outlines from the very start: there is clearly something
+     to find, and nothing says what. */
+  .slots { display: flex; gap: 8px; padding: 9px 11px; align-items: center; }
+  .slot {
+    height: 28px; min-width: 30px; padding: 0 10px;
+    display: grid; place-items: center;
+    border: 2px dashed var(--line-2); border-radius: 999px;
+    font-size: 11px; font-weight: 800; color: var(--ink-dim);
+    letter-spacing: .02em;
+    transition: background .3s ease, color .3s ease, border-color .3s ease, transform .3s cubic-bezier(.2,.9,.3,1);
+  }
+  .slot.on {
+    border-style: solid; border-color: var(--good);
+    background: var(--mint); color: #0C1A16;
+    transform: scale(1.04);
+  }
+
+  .walk { display: flex; gap: 10px; }
+  .walk .btn { min-width: 86px; }
+  .dock .hint { max-width: min(46ch, 48vw); }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<div class="stage" id="stage"></div>
+
+<div class="ui-layer">
+  <div class="topbar" style="align-items:flex-start">
+    <div class="panel">
+      <div class="eyebrow" id="eyebrow"></div>
+      <div class="title" id="title"></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="trackers">
+      <div class="stats" id="stats"></div>
+      <div class="tally" id="tally"></div>
+      <div class="panel slots" id="slots"></div>
+    </div>
+  </div>
+
+  <div style="flex:1"></div>
+
+  <div class="dock">
+    <div class="walk">
+      <button class="btn clickable" id="left" type="button"></button>
+      <button class="btn clickable" id="right" type="button"></button>
+    </div>
+    <div class="hint" id="hint"></div>
+    <div style="flex:1"></div>
+    <button class="btn primary clickable" id="open" type="button" disabled></button>
+    <button class="btn ghost clickable" id="restart" type="button"></button>
+  </div>
+</div>
+
+<div class="loading" id="loading">Unlocking the café…</div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>

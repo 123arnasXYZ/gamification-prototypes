@@ -2,9 +2,11 @@
 
 **Live: <https://123arnasxyz.github.io/gamification-prototypes/>**
 
-Fourteen small interactive learning mechanics built on Three.js, designed to be dropped into a
+Nineteen small interactive learning mechanics built on Three.js, designed to be dropped into a
 WordPress page as an `<iframe>`. There is **no build step** — the browser loads ES modules
 directly and Three.js comes from a CDN via an import map.
+
+**View all prototypes** in the carousel opens a lightbox listing all 23 ideas, filterable by topic; clicking one jumps straight to it. The topics come from `tags.csv` and are the same list shown under "Where we'd use it".
 
 Because there is nothing to compile, GitHub Pages serves the repository as-is: pushing to `main`
 publishes. Deep links work too — `#photo-hunt` on the end of the URL opens that prototype.
@@ -39,6 +41,11 @@ prototypes/
   12-onboarding-adventure/     walk the floor, find the stations, unlock the door
   13-world-reacts/             the team react to each other, sometimes a week later
   14-juggle/                   four measures that pull against each other all week
+  15-give-a-role/              one incident, three jobs, and the brief changes with yours
+  16-taste-of-mastery/         set the desk up with the assessor's kit on, then without
+  17-hints-cost/               triage by hand; three asks for the whole morning
+  18-side-quests/              open the cafe: three jobs, three optional things nobody mentions
+  19-bonus-challenges/         five challenges layered over one ordinary quiz
 ```
 
 Every prototype follows the same shape: `index.html` holds the DOM overlay, `main.js` builds the
@@ -163,7 +170,12 @@ Two alternatives, both fine:
 | `12-onboarding-adventure` | The stations along the floor and what each one says, the hidden bonus, and the ending |
 | `13-world-reacts` | The four team members, the three decisions and what each option does to the relationships between everyone else, the messages (immediate and delayed), and the endings |
 | `14-juggle` | The four measures and their limits, the four decisions and what each option moves, the threshold events and the endings |
-| `shell/content.js` | Every word in the carousel around each prototype: title, subtitle, "the learning opportunity", "the idea", "why it works", the topic tags and the 1–5 effort rating. Taken from the *23 gamification ideas for L&D teams* document |
+| `15-give-a-role` | The three roles, the briefing worded for each, and the per-role options with their outcomes |
+| `16-taste-of-mastery` | The five items and their three positions each, which one the assessor picks and the reason tag, and the two starting messes |
+| `17-hints-cost` | The eight items and their right tray, the senior's reasoning for each, the nudge when one comes back round, and what every route scores |
+| `18-side-quests` | The three opening jobs, the three optional activities (strays, crates, chiller) and what the ending says about each |
+| `19-bonus-challenges` | The six questions, and the five challenges with the condition each one tests |
+| `shell/content.js` | Every word in the carousel around each prototype: title, subtitle, "the learning opportunity", "the idea", "why it works", the topic tags and the 1–5 effort rating. Taken from the *23 gamification ideas for L&D teams* document. Also `ideas` (all 23, including the four with no prototype yet) and `topics` (the filter chips), which drive the **View all prototypes** lightbox |
 
 A few rules the code depends on:
 

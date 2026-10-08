@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Make Hints Cost Something — Morning Triage</title>
+<!-- ?v= bumps the cache when the shared styling changes -->
+<link rel="stylesheet" href="../../shared/style.css?v=2">
+<style>
+  /* The item panel is tall, so messages sit above it rather than on it */
+  .toasts { bottom: 250px; }
+
+  .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; width: 100%; }
+  .row .grow { flex: 1; min-width: 160px; font-size: 13px; font-weight: 600; color: var(--ink-dim); }
+
+  .item h2 { color: var(--blue); font-size: 19px; margin: 2px 0 5px; line-height: 1.15; }
+  .item .line { font-size: 14px; color: var(--ink); margin: 0 0 10px; }
+
+  /* The reasoning only appears once a token is spent — it reads as
+     something that was bought, not as ambient help text. */
+  .said {
+    border-left: 3px solid var(--mint);
+    background: var(--grey);
+    border-radius: 0 var(--r-sm) var(--r-sm) 0;
+    padding: 9px 12px;
+    margin: 0 0 10px;
+  }
+  .said.nudge { border-left-color: #E0B02A; }
+  .said .eyebrow { color: var(--ink-dim); margin-bottom: 3px; }
+  .said p { font-size: 13px; color: var(--ink); line-height: 1.5; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<div class="stage" id="stage"></div>
+
+<div class="ui-layer">
+  <div class="topbar" style="align-items:flex-start">
+    <div class="panel" style="max-width:min(430px,54vw)">
+      <div class="eyebrow" id="eyebrow"></div>
+      <div class="title" id="title"></div>
+    </div>
+    <div class="spacer"></div>
+    <div style="display:flex;flex-direction:column;gap:9px;align-items:flex-end">
+      <div class="stats" id="stats"></div>
+      <button class="btn ghost clickable" id="restart" type="button">Restart</button>
+    </div>
+  </div>
+
+  <div style="flex:1"></div>
+
+  <div class="panel clickable" id="bottom" style="width:min(660px,96vw);margin:0 auto"></div>
+</div>
+
+<div class="loading" id="loading">Opening the morning post…</div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>
