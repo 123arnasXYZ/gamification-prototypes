@@ -132,7 +132,17 @@ html, body {
   background: #0b0e13;
   transition: opacity .2s ease, transform .2s ease;
 }
-.frame-wrap iframe { width: 100%; height: 100%; border: 0; display: block; }
+/* The prototype is laid out at one logical size and scaled to fit,
+   so a short frame shrinks the whole thing instead of cutting the
+   bottom off it. main's fitFrame() writes the width, height and
+   transform; this is only where it sits. */
+.frame-wrap iframe {
+  position: absolute;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  border: 0; display: block;
+  transform-origin: top left;
+}
 
 .expand {
   position: absolute;
@@ -607,6 +617,48 @@ document.getElementById('prev').addEventListener('click', () => go(index - 1, -1
 document.getElementById('next').addEventListener('click', () => go(index + 1, 1));
 document.getElementById('expand').addEventListener('click', () => frameWrap.requestFullscreen?.());
 
+/* ---------------- Fitting the prototype into the frame ----------------
+   Every prototype is built for a desk-sized window. Rather than let a
+   short frame crop one, the iframe is given that size and scaled down
+   as a single piece — the same layout, smaller, which is what the frame
+   would show on a bigger screen.
+
+   Two cases are left alone: a frame big enough not to need it, and one
+   so small that scaling would be unreadable (a phone, where the
+   prototypes use their own narrow layouts instead). */
+const FIT = {
+  base: { w: 1120, h: 760 },  // the size the prototypes are composed for
+  minWidth: 560,              // under this, let the prototype lay itself out
+  minScale: 0.5,              // and below this, scaling stops being legible
+};
+
+function fitFrame() {
+  const r = frameWrap.getBoundingClientRect();
+  if (!r.width || !r.height) return;
+
+  const s = Math.min(r.width / FIT.base.w, r.height / FIT.base.h, 1);
+  const natural = s >= 1 || r.width < FIT.minWidth || s < FIT.minScale;
+
+  if (natural) {
+    frame.style.width = '100%';
+    frame.style.height = '100%';
+    frame.style.transform = 'none';
+    return;
+  }
+
+  /* The logical window keeps the frame's own shape at the scale that
+     makes its smaller side reach the base. It is therefore never
+     under the base in either direction, and it fills the frame
+     exactly — any room the frame has spare goes to the prototype
+     rather than to a letterbox. */
+  frame.style.width = `${r.width / s}px`;
+  frame.style.height = `${r.height / s}px`;
+  frame.style.transform = `scale(${s})`;
+}
+
+new ResizeObserver(() => fitFrame()).observe(frameWrap);
+document.addEventListener('fullscreenchange', () => fitFrame());
+
 document.addEventListener('keydown', (e) => {
   if (e.target.closest('input, textarea')) return;
   if (e.key === 'Escape' && !lightbox.hidden) return closeSheet();
@@ -736,6 +788,7 @@ window.addEventListener('hashchange', () => {
 const start = prototypes.findIndex((p) => p.id === location.hash.slice(1));
 index = start >= 0 ? start : 0;
 render(index);
+fitFrame();
 </script>
 
 </body>
