@@ -13,8 +13,8 @@ publishes. Deep links work too — `#photo-hunt` on the end of the URL opens tha
 
 ```
 serve.py                       dev server with caching disabled
-index.html                     the front door — gamification examples, or animation (locked)
-gamification.html              carousel shell — one prototype at a time, with its write-up
+index.html                     carousel shell — one prototype at a time, with its write-up
+                               (the front door that links here lives in the 123arnasXYZ.github.io repo)
 overview.html                  grid view of them all
 assets/
   controller_full.png          effort rating artwork
@@ -210,7 +210,7 @@ Everything follows the slide deck: white ground, `#2757E2` blue, a mint accent f
 `// THE IDEA:` labels, and **Urbanist**. If the site has no internet access the font falls back to
 Segoe UI / system-ui and everything else still holds up.
 
-- **The shell** (`index.html`, `gamification.html`, `overview.html`) defines its own tokens at the top of its `<style>`
+- **The shell** (`index.html`, `overview.html`) defines its own tokens at the top of its `<style>`
   block. Change `--blue` and `--mint` there. The effort rating uses the two PNGs in `assets/`.
 - **The prototype overlays** use the same palette from `shared/style.css` — white panels floating
   over the 3D, blue headings, pill buttons. Change `--blue`, `--mint` and `--accent-2` on `:root`
