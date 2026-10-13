@@ -34,19 +34,31 @@ export const avatarColours = {
 };
 
 /* How each person is doing with the rest of the team, worst first. */
+/* The status under a name describes that person's WORST relationship,
+   and says who it is with: "not speaking to Nia" tells you something,
+   "careful around the team" does not. {name} is the other person. */
 export const memberStatus = [
-  { atMost: -0.35, tone: 'bad',  text: 'not speaking to someone' },
-  { atMost:  0.05, tone: 'warn', text: 'careful around the team' },
-  { atMost:  0.45, tone: '',     text: 'fine' },
+  { atMost: -0.35, tone: 'bad',  text: 'not speaking to {name}' },
+  { atMost:  0.05, tone: 'warn', text: 'wary of {name} now' },
+  { atMost:  0.45, tone: '',     text: 'civil with everyone' },
   { atMost:  Infinity, tone: 'good', text: 'working well with everyone' },
 ];
 
+/* The pair list in the sidebar: every relationship between two of them,
+   so the thing the learner is actually changing is on screen. */
+export const pairsLabel = 'Between them';
+export const wantsLabel = 'What they want';
+
 /* The four of them. The learner is not on this list. */
 export const people = [
-  { id: 'ade',  name: 'Ade',  role: 'Delivery' },
-  { id: 'nia',  name: 'Nia',  role: 'Delivery' },
-  { id: 'tom',  name: 'Tom',  role: 'Client lead' },
-  { id: 'kara', name: 'Kara', role: 'Analyst' },
+  { id: 'ade',  name: 'Ade',  role: 'Delivery',
+    wants: 'to be trusted to sort his own work out' },
+  { id: 'nia',  name: 'Nia',  role: 'Delivery',
+    wants: 'her workload to stay somewhere near what she agreed to' },
+  { id: 'tom',  name: 'Tom',  role: 'Client lead',
+    wants: 'to hear things from you before the client says them to him' },
+  { id: 'kara', name: 'Kara', role: 'Analyst',
+    wants: 'a shot at something bigger than the work she gets now' },
 ];
 
 /* Everything starts civil but not warm. */

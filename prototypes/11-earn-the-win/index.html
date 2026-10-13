@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="../../shared/style.css?v=2">
 <style>
   /* Keep the consequence line clear of the decision panel */
-  .toasts { bottom: 190px; }
+  .toasts { bottom: 206px; }
 
   /* Two-step tracker: step 2 is visibly shut until step 1 is earned */
   .steps { display: flex; gap: 8px; }
@@ -48,36 +48,56 @@
   .support.firm { border-left-color: var(--blue); }
   .support b { display: block; color: var(--ink); font-size: 13.5px; margin-bottom: 2px; }
   @keyframes support-in { from { opacity: 0; transform: translateY(8px); } }
-</style>
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+
+  /* The board is drawn in the room the overlay leaves it, so the
+     overlay is laid out as a column with the decision panel across
+     the bottom — and, when the frame is short and wide, as two
+     columns with the decision panel down the right, so the email on
+     the canvas keeps a readable size. main.js measures these. */
+  .col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+  #bottom { width: min(660px, 96vw); margin: 0 auto; flex: 0 0 auto; }
+
+  @media (max-height: 640px) and (min-width: 860px) {
+    .ui-layer { flex-direction: row; align-items: stretch; gap: 14px; }
+    #bottom {
+      width: min(400px, 40vw); margin: 0;
+      align-self: stretch; overflow-y: auto;
+    }
+    .opts .btn { flex: 1 1 100%; }
+    .toasts {
+      left: 20px; bottom: 20px; transform: none;
+      align-items: flex-start; max-width: min(380px, 42vw);
+    }
   }
-}
-</script>
+
+  @media (max-height: 640px) and (max-width: 859px) {
+    .toasts { bottom: 198px; }
+    .deck { gap: 8px; }
+  }
+</style>
 </head>
 <body>
 
 <div class="stage" id="stage"></div>
 
-<div class="ui-layer">
-  <div class="topbar" style="align-items:flex-start">
-    <div class="panel" style="max-width:min(400px,50vw)">
-      <div class="eyebrow" id="eyebrow"></div>
-      <div class="title" id="title"></div>
+<div class="ui-layer" id="ui">
+  <div class="col" id="col">
+    <div class="topbar" id="topbar" style="align-items:flex-start">
+      <div class="panel" style="max-width:min(400px,50vw)">
+        <div class="eyebrow" id="eyebrow"></div>
+        <div class="title" id="title"></div>
+      </div>
+      <div class="spacer"></div>
+      <div style="display:flex;flex-direction:column;gap:9px;align-items:flex-end">
+        <div class="steps" id="steps"></div>
+        <button class="btn ghost clickable" id="restart" type="button">Restart</button>
+      </div>
     </div>
-    <div class="spacer"></div>
-    <div style="display:flex;flex-direction:column;gap:9px;align-items:flex-end">
-      <div class="steps" id="steps"></div>
-      <button class="btn ghost clickable" id="restart" type="button">Restart</button>
-    </div>
+
+    <div style="flex:1"></div>
   </div>
 
-  <div style="flex:1"></div>
-
-  <div class="panel clickable" id="bottom" style="width:min(660px,96vw);margin:0 auto"></div>
+  <div class="panel clickable" id="bottom"></div>
 </div>
 
 <div class="loading" id="loading">Opening the office…</div>

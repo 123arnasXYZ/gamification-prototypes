@@ -2,7 +2,7 @@
 
 **Live: <https://123arnasxyz.github.io/gamification-prototypes/>**
 
-Nineteen small interactive learning mechanics built on Three.js, designed to be dropped into a
+All twenty-three ideas from the deck, built as small interactive learning mechanics on Three.js, designed to be dropped into a
 WordPress page as an `<iframe>`. There is **no build step** — the browser loads ES modules
 directly and Three.js comes from a CDN via an import map.
 
@@ -13,7 +13,8 @@ publishes. Deep links work too — `#photo-hunt` on the end of the URL opens tha
 
 ```
 serve.py                       dev server with caching disabled
-index.html                     carousel shell — one prototype at a time, with its write-up
+index.html                     the front door — gamification examples, or animation (locked)
+gamification.html              carousel shell — one prototype at a time, with its write-up
 overview.html                  grid view of them all
 assets/
   controller_full.png          effort rating artwork
@@ -33,7 +34,7 @@ prototypes/
   04-photo-hunt/
   05-challenge-first/          try first; hints unlock only when an attempt fails
   06-invisible-tutorial/       one new rule per step, help fading to nothing
-  07-build-your-answer/        tone x action, each part scored on its own
+  07-build-your-answer/        tone x action, each part scored on its own, each read by the customer
   08-progress-map/             level map where stages unlock only by succeeding
   09-consequences/             no feedback box; an overloaded box is crushed on the spot
   10-hot-cold/                 every look reports how close it was, until the breach is found
@@ -41,11 +42,15 @@ prototypes/
   12-onboarding-adventure/     walk the floor, find the stations, unlock the door
   13-world-reacts/             the team react to each other, sometimes a week later
   14-juggle/                   four measures that pull against each other all week
-  15-give-a-role/              one incident, three jobs, and the brief changes with yours
-  16-taste-of-mastery/         set the desk up with the assessor's kit on, then without
+  15-give-a-role/              one incident, six jobs, and your role decides which two are yours
+  16-taste-of-mastery/         review a client report with the reviewer's eye on, then without
   17-hints-cost/               triage by hand; three asks for the whole morning
-  18-side-quests/              open the cafe: three jobs, three optional things nobody mentions
-  19-bonus-challenges/         five challenges layered over one ordinary quiz
+  18-side-quests/              set up a scanner: three required acts, four optional discoveries
+  19-bonus-challenges/         six challenges layered over one day's planning
+  20-simulator/                a service desk week you tune, run and run again
+  21-practise-partner/         a one-to-one where the only decision is when you speak
+  22-management-sim/           five days running a support office, consequences arriving late
+  23-rival/                    a shared backlog, and somebody reading what you take
 ```
 
 Every prototype follows the same shape: `index.html` holds the DOM overlay, `main.js` builds the
@@ -162,7 +167,7 @@ Two alternatives, both fine:
 | `04-photo-hunt` | The one hazard and its position, the three waypoints, and how much film |
 | `05-challenge-first` | The task, the three places to deal with it and what each wrong one leads to, the two hints, and the two endings |
 | `06-invisible-tutorial` | The four steps: which bins exist, which parcels arrive, how much help (`always` / `once` / `when-new` / `none`) and the coach wording |
-| `07-build-your-answer` | The tone and action options with their scores, lines and feedback, plus the verdict and customer-reply rules |
+| `07-build-your-answer` | The tone and action options with their scores, lines, feedback and what each one does to the customer's face, plus the verdict and reply rules |
 | `08-progress-map` | The stages in order, each with its question, options and the explanation shown on a wrong answer |
 | `09-consequences` | The three boxes (weight and how much each can carry), what you see when one is crushed, and what the driver says at the other end |
 | `10-hot-cold` | The candidate hiding places on the desk, the proximity words and their distance bands, and the wording for each attempt band |
@@ -170,11 +175,15 @@ Two alternatives, both fine:
 | `12-onboarding-adventure` | The stations along the floor and what each one says, the hidden bonus, and the ending |
 | `13-world-reacts` | The four team members, the three decisions and what each option does to the relationships between everyone else, the messages (immediate and delayed), and the endings |
 | `14-juggle` | The four measures and their limits, the four decisions and what each option moves, the threshold events and the endings |
-| `15-give-a-role` | The three roles, the briefing worded for each, and the per-role options with their outcomes |
-| `16-taste-of-mastery` | The five items and their three positions each, which one the assessor picks and the reason tag, and the two starting messes |
+| `15-give-a-role` | The three roles with the minutes each one has, and the six jobs with an outcome for held, passed, mis-passed and never got to |
+| `16-taste-of-mastery` | The two documents and which parts of each are wrong, the reviewer's reason for every one, and the three passes' wording |
 | `17-hints-cost` | The eight items and their right tray, the senior's reasoning for each, the nudge when one comes back round, and what every route scores |
-| `18-side-quests` | The three opening jobs, the three optional activities (strays, crates, chiller) and what the ending says about each |
-| `19-bonus-challenges` | The six questions, and the five challenges with the condition each one tests |
+| `18-side-quests` | The three required steps, the four optional discoveries (hold, wipe, dock, keypad) and what the ending says about each |
+| `19-bonus-challenges` | The day, the three meetings, the seven jobs and the six challenges with the condition each one tests |
+| `20-simulator` | The three dials and their ranges, the model's numbers, the three challenges and the closing wording |
+| `21-practise-partner` | What the colleague says each turn, the timing windows, and the four outcomes per turn |
+| `22-management-sim` | The people, lanes and events, every rule and delayed consequence, and the handover bands |
+| `23-rival` | The twelve cards with their worth and hours, the rules Mara plays by, and her line for each one |
 | `shell/content.js` | Every word in the carousel around each prototype: title, subtitle, "the learning opportunity", "the idea", "why it works", the topic tags and the 1–5 effort rating. Taken from the *23 gamification ideas for L&D teams* document. Also `ideas` (all 23, including the four with no prototype yet) and `topics` (the filter chips), which drive the **View all prototypes** lightbox |
 
 A few rules the code depends on:
@@ -201,7 +210,7 @@ Everything follows the slide deck: white ground, `#2757E2` blue, a mint accent f
 `// THE IDEA:` labels, and **Urbanist**. If the site has no internet access the font falls back to
 Segoe UI / system-ui and everything else still holds up.
 
-- **The shell** (`index.html`, `overview.html`) defines its own tokens at the top of its `<style>`
+- **The shell** (`index.html`, `gamification.html`, `overview.html`) defines its own tokens at the top of its `<style>`
   block. Change `--blue` and `--mint` there. The effort rating uses the two PNGs in `assets/`.
 - **The prototype overlays** use the same palette from `shared/style.css` — white panels floating
   over the 3D, blue headings, pill buttons. Change `--blue`, `--mint` and `--accent-2` on `:root`

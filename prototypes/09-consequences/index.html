@@ -3,22 +3,56 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Use Immediate Consequences as Feedback — Pallet</title>
+<title>Use Immediate Consequences as Feedback — Mezzanine Lift</title>
 <!-- ?v= bumps the cache when the shared styling changes -->
 <link rel="stylesheet" href="../../shared/style.css?v=2">
 <style>
-  /* Keep the "what just happened" line clear of the bottom panel */
-  .toasts { bottom: 110px; }
+  /* Keep the "what just happened" messages clear of the bottom panel.
+     The build panel is ~167px tall plus the 16px layer padding. */
+  .toasts { bottom: 196px; }
 
   .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; width: 100%; }
   .row .grow { flex: 1; min-width: 180px; }
 
-  .recap { width: 100%; }
-  .recap h2 { color: var(--blue); font-size: 20px; margin: 2px 0 6px; }
-  .recap .driver { font-size: 14px; color: var(--ink-dim); font-style: italic; margin: 0 0 10px; }
-  .beat { border-left: 3px solid var(--line-2); padding: 2px 0 2px 12px; margin-bottom: 7px; font-size: 13.5px; color: var(--ink-dim); }
+  /* What the thing under the cursor is like to load */
+  .note {
+    width: 100%; font-size: 12.5px; line-height: 1.45; color: var(--ink-dim);
+    min-height: 36px; margin-bottom: 8px;
+  }
+  .note b { color: var(--ink); }
+
+  /* The live centre-of-gravity reading, above the buttons */
+  .gauge { width: 100%; margin-bottom: 10px; }
+  .gauge .k {
+    display: block; font-size: 10.5px; font-weight: 800; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--ink-dim);
+  }
+  .gauge .v { display: block; font-size: 13.5px; color: var(--ink); margin-top: 2px; }
+  .gauge .bar {
+    height: 5px; border-radius: 3px; background: rgba(16, 19, 26, 0.10);
+    overflow: hidden; margin-top: 7px;
+  }
+  .gauge .bar > i { display: block; height: 100%; background: var(--good); transition: width .4s ease; }
+
+  /* The ending */
+  .recap { width: 100%; max-height: min(58vh, 400px); overflow-y: auto; }
+  .recap h2 { color: var(--blue); font-size: 19px; margin: 2px 0 8px; }
+  .recap .driver { font-size: 14px; color: var(--ink-dim); font-style: italic; margin: 12px 0 0; }
+  .beat {
+    border-left: 3px solid var(--line-2); padding: 2px 0 2px 12px; margin: 6px 0 0;
+    font-size: 13px; color: var(--ink-dim); line-height: 1.5;
+  }
   .beat b { color: var(--ink); }
+  .beat.air { border-left-color: var(--blue); }
   .recap .q { font-size: 13.5px; color: var(--ink); font-style: italic; margin: 12px 0 10px; }
+
+  /* Short frames: the panel gives up padding before it gives up content */
+  @media (max-height: 580px) {
+    .note { min-height: 32px; font-size: 12px; }
+    .recap { max-height: 50vh; }
+    .recap h2 { font-size: 17px; }
+    .beat { font-size: 12.5px; }
+  }
 </style>
 <script type="importmap">
 {
@@ -45,10 +79,10 @@
 
   <div style="flex:1"></div>
 
-  <div class="panel clickable" id="bottom" style="width:min(620px,96vw);margin:0 auto"></div>
+  <div class="panel clickable" id="bottom" style="width:min(640px,96vw);margin:0 auto"></div>
 </div>
 
-<div class="loading" id="loading">Opening the bay…</div>
+<div class="loading" id="loading">Opening bay 3…</div>
 
 <script type="module" src="./main.js"></script>
 </body>

@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gamification Prototypes</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bundle — Examples</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,10 +12,17 @@
 
 <style>
 /* ============================================================
-   Slide layout: the pitch on the left, the live prototype on the
-   right. White ground, one blue, mint pills for the topic tags,
-   Urbanist throughout. The prototypes inside the frame keep their
-   own theme from shared/style.css.
+   The front door. Two choices, in the same language as the slide
+   deck behind it: white ground, one blue, mint for anything good,
+   Urbanist throughout, and the Bundle mark at the end.
+
+   One column, centred, with a width cap — so it sits in the middle
+   of a wide monitor and stacks on a phone without any of it
+   drifting off to one side.
+
+   One of the two choices is deliberately shut. It is drawn as a
+   real card rather than hidden, so it reads as "coming", not
+   "missing".
    ============================================================ */
 :root {
   --blue:      #2757E2;
@@ -25,14 +32,13 @@
   --ink-soft:  #464B58;
   --line:      #E4E7EF;
   --grey:      #F4F6FA;
-  --nav:       96px;   /* space kept clear for the logo and arrows */
-  --top:       26px;   /* blue block and prototype frame start on this line */
+  --wrap:      1080px;  /* how wide the column is allowed to get */
+  --gutter:    28px;    /* the air either side of it */
+  --foot:      104px;   /* the strip the Bundle mark sits in */
 }
 
 * { box-sizing: border-box; }
 
-/* One scrollbar style for the whole shell: a slim rounded thumb and no
-   stepper arrows, so nothing square turns up beside a rounded panel. */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
@@ -41,17 +47,11 @@
   background-clip: padding-box;
   border-radius: 999px;
 }
-::-webkit-scrollbar-thumb:hover { background: #97A5C8; background-clip: padding-box; }
-::-webkit-scrollbar-button,
-::-webkit-scrollbar-button:single-button,
-::-webkit-scrollbar-button:double-button { display: none; width: 0; height: 0; }
-::-webkit-scrollbar-corner { background: transparent; }
+::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
 html { scrollbar-width: thin; scrollbar-color: #CBD2E4 transparent; }
 
 html, body {
-  height: 100%;
   margin: 0;
-  overflow: hidden;
   background: #fff;
   color: var(--ink);
   font-family: "Urbanist", "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -59,666 +59,322 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
-.slide {
-  height: 100%;
-  display: grid;
-  grid-template-columns: minmax(360px, 42fr) 58fr;
-  gap: 26px;
-  padding-bottom: var(--nav);
+/* The whole page is one centred column, vertically centred too when
+   there is room to spare. */
+.page {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0 var(--foot);
 }
 
-/* ---------------- Left: the pitch ---------------- */
-.pitch { min-height: 0; overflow-y: auto; padding-bottom: 12px; }
-.pitch::-webkit-scrollbar { width: 8px; }
-.pitch::-webkit-scrollbar-thumb { background: #DCE1EC; border-radius: 999px; }
+.wrap {
+  width: min(var(--wrap), 100% - var(--gutter) * 2);
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
 
+/* ---------------- The blue block ---------------- */
 .hero {
   background: var(--blue);
   color: #fff;
-  border-radius: 0 0 26px 0;
-  padding: 28px 38px 26px;
-  margin: var(--top) 0 20px;
+  border-radius: 28px;
+  padding: 36px 40px 34px;
+  text-align: center;
+}
+.hero .eyebrow {
+  margin: 0 0 10px;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  opacity: .8;
 }
 .hero h1 {
-  margin: 0 0 8px;
-  font-size: clamp(26px, 2.5vw, 40px);
+  margin: 0 0 12px;
+  font-size: clamp(26px, 3.4vw, 44px);
   font-weight: 800;
   line-height: 1.04;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.022em;
 }
-.hero h1 .num { font-weight: 800; }
-.hero .sub { margin: 0; font-size: clamp(14px, 1.1vw, 17px); font-weight: 700; line-height: 1.35; }
-
-.hero .label { margin: 20px 0 8px; }
-.label {
-  font-size: 13.5px;
-  font-weight: 800;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-}
-.hero .label { color: #fff; }
-.hero .body p { margin: 0 0 10px; font-size: 14.5px; line-height: 1.5; font-weight: 500; }
-.hero .body p:last-child { margin-bottom: 0; }
-
-.cols { padding: 0 38px; }
-.cols .label { color: var(--ink); margin: 0 0 10px; }
-.cols ul { list-style: none; margin: 0 0 18px; padding: 0; }
-.cols li {
-  display: flex;
-  gap: 11px;
-  align-items: flex-start;
-  margin-bottom: 8px;
-  font-size: 14.5px;
+.hero p {
+  margin: 0 auto;
+  max-width: 620px;
+  font-size: clamp(14px, 1.25vw, 17px);
+  font-weight: 600;
   line-height: 1.45;
-  color: var(--ink);
 }
-.cols li img { width: 19px; height: 19px; flex: none; margin-top: 2px; }
 
-/* ---------------- Right: the prototype ---------------- */
-.show {
-  min-height: 0;
+/* ---------------- The two choices ---------------- */
+.choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: var(--top) 38px 0 0;
-}
-
-.frame-wrap {
-  position: relative;
-  flex: 1 1 auto;
-  min-height: 0;
-  border-radius: 16px;
-  overflow: hidden;
-  background: #0b0e13;
-  transition: opacity .2s ease, transform .2s ease;
-}
-.frame-wrap iframe { width: 100%; height: 100%; border: 0; display: block; }
-
-.expand {
-  position: absolute;
-  right: 14px; bottom: 14px;
-  width: 44px; height: 44px;
-  border: 0; border-radius: 50%;
-  background: #10131A;
-  color: #fff;
-  cursor: pointer;
-  display: grid; place-items: center;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, .3);
-  transition: transform .16s ease, background .16s ease;
-}
-.expand:hover { transform: scale(1.08); background: var(--blue); }
-.expand svg { width: 18px; height: 18px; }
-
-.meta {
-  flex: 0 0 auto;
-  background: var(--grey);
-  border-radius: 16px;
-  padding: 20px 24px;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 22px;
-  align-items: start;
-}
-.meta .label { color: var(--ink); margin-bottom: 12px; display: block; }
-.meta .divider { border-left: 2px solid #E1E5EE; padding-left: 22px; }
-
-.tags { display: flex; flex-wrap: wrap; gap: 8px; }
-.tags span {
-  background: var(--mint);
-  color: #0C1A16;
-  border-radius: 999px;
-  padding: 7px 15px;
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.effort-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
-.effort-pill {
-  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
   background: #fff;
-  border: 2px solid var(--line);
-  border-radius: 999px;
-  padding: 6px 15px 6px 10px;
-  font-size: 13.5px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: transform .18s cubic-bezier(.2,.9,.3,1), box-shadow .18s ease, border-color .18s ease;
+}
+.card .band {
+  height: clamp(86px, 11vh, 120px);
+  display: grid;
+  place-items: center;
+  background: var(--blue);
+}
+.card .band svg { width: clamp(38px, 4.4vh, 56px); height: auto; }
+.card .body {
+  padding: clamp(18px, 2.4vh, 26px) clamp(20px, 2.2vw, 28px) clamp(18px, 2.4vh, 24px);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 8px;
+}
+.card h2 {
+  margin: 0;
+  font-size: clamp(19px, 1.9vw, 26px);
   font-weight: 800;
-  color: var(--ink);
-  white-space: nowrap;
+  letter-spacing: -0.015em;
 }
-.effort-pill .dot {
-  width: 17px; height: 17px; border-radius: 50%;
+.card p {
+  margin: 0;
+  font-size: clamp(13px, 1.05vw, 15px);
+  line-height: 1.5;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+.card .foot {
+  margin-top: auto;
+  padding-top: clamp(12px, 2vh, 20px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: #EAFBF4;
+  color: #0F8A68;
+  font-size: 12.5px;
+  font-weight: 800;
+}
+.pill svg { width: 14px; height: 14px; flex: none; }
+.go {
+  width: clamp(40px, 5vh, 48px);
+  height: clamp(40px, 5vh, 48px);
+  border-radius: 50%;
+  background: var(--blue);
   color: #fff;
-  font-size: 12px; font-weight: 800;
-  display: grid; place-items: center;
+  display: grid;
+  place-items: center;
+  flex: none;
+  box-shadow: 0 6px 18px rgba(39, 87, 226, 0.28);
+  transition: background .16s ease, transform .16s ease;
 }
-/* Only the harder ratings carry a warning, and it goes amber before red */
-.effort-pill .dot.warn  { background: #F0B429; }
-.effort-pill .dot.alert { background: #E8174A; }
-.effort-pill .sep { color: #C3CADA; font-weight: 600; margin: 0 1px; }
-.pads { display: flex; gap: 7px; }
-.pads img { width: 52px; height: auto; display: block; }
+.go svg { width: 45%; height: auto; }
 
-/* ---------------- Bottom bar ---------------- */
+/* The open one */
+.card.open:hover,
+.card.open:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 44px rgba(16, 19, 26, 0.12);
+  border-color: #C9D5F7;
+  outline: none;
+}
+.card.open:hover .go,
+.card.open:focus-visible .go { background: var(--blue-dark); transform: scale(1.07); }
+
+/* The shut one: still a card, plainly not ready */
+.card.locked { background: var(--grey); border-style: dashed; cursor: not-allowed; }
+.card.locked .band { background: #D7DCE8; }
+.card.locked .band svg { opacity: .75; }
+.card.locked h2, .card.locked p { color: #7E8698; }
+.card.locked .pill { background: #E6E9F1; color: #6B7488; }
+.card.locked .go { background: #C3CADA; box-shadow: none; }
+.card.locked .lock {
+  position: absolute;
+  top: 16px; right: 16px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.92);
+  display: grid; place-items: center;
+  color: #6B7488;
+  box-shadow: 0 3px 10px rgba(16,19,26,.1);
+}
+.card.locked .lock svg { width: 16px; height: 16px; }
+/* A small shake when it is pressed, so the lock reads as deliberate */
+.card.locked.nudge { animation: nudge .42s cubic-bezier(.36,.07,.19,.97); }
+@keyframes nudge {
+  10%, 90% { transform: translateX(-2px); }
+  20%, 80% { transform: translateX(3px); }
+  30%, 50%, 70% { transform: translateX(-5px); }
+  40%, 60% { transform: translateX(5px); }
+}
+
+.note {
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #8A91A3;
+  min-height: 20px;
+}
+
+/* ---------------- The mark at the end ---------------- */
 .logo {
   pointer-events: none;
   position: fixed;
-  left: 50%; bottom: 16px;
+  left: 50%; bottom: 18px;
   transform: translateX(-50%);
   height: 56px;
 }
 .logo img { height: 100%; width: auto; display: block; }
 
-.nav {
-  position: fixed;
-  bottom: 22px;
-  width: 54px; height: 54px;
-  border-radius: 50%;
-  border: 0;
-  background: var(--blue);
-  color: #fff;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  box-shadow: 0 6px 18px rgba(39, 87, 226, 0.28);
-  transition: background .16s ease, transform .16s ease;
-}
-.nav:hover { background: var(--blue-dark); transform: scale(1.07); }
-.nav:active { transform: scale(0.97); }
-.nav.prev { left: 24px; }
-.nav.next { right: 24px; }
-.nav svg { width: 22px; height: 22px; }
-
-/* ---------------- All-prototypes lightbox ---------------- */
-/* A class that sets `display` beats the browser's own rule for the
-   hidden attribute, so say it explicitly or the sheet shows on load. */
-[hidden] { display: none !important; }
-
-.view-all {
-  display: block;
-  margin: 10px auto 0;
-  background: none; border: 0;
-  font: inherit; font-size: 13.5px; font-weight: 700;
-  color: var(--blue);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
-.view-all:hover { color: var(--blue-dark); }
-
-.scrim {
-  position: fixed; inset: 0; z-index: 30;
-  background: rgba(16, 19, 26, .55);
-  display: grid; place-items: center;
-  padding: 20px 18px;
-  animation: scrim-in .18s ease both;
-}
-@keyframes scrim-in { from { opacity: 0; } }
-
-.sheet {
-  position: relative;
-  width: min(1480px, 100%);
-  max-height: 100%;
-  overflow-y: auto;
-  background: #fff;
-  border-radius: 20px;
-  padding: 26px 30px 30px;
-  box-shadow: 0 30px 80px rgba(8, 12, 20, .4);
-  animation: sheet-in .22s cubic-bezier(.2,.9,.3,1) both;
-  /* Firefox */
-  scrollbar-width: thin;
-  scrollbar-color: #CBD2E4 transparent;
-}
-/* The bar rides inside the sheet, short of the corners, so the rounding
-   still reads along the right-hand edge. */
-.sheet::-webkit-scrollbar { width: 14px; }
-.sheet::-webkit-scrollbar-track { background: transparent; margin: 18px 0; }
-.sheet::-webkit-scrollbar-thumb {
-  background: #CBD2E4;
-  border: 4px solid transparent;      /* transparent border + clip = an inset bar */
-  background-clip: padding-box;
-  border-radius: 999px;
-}
-.sheet::-webkit-scrollbar-thumb:hover { background: #97A5C8; background-clip: padding-box; }
-/* No stepper arrows at either end — just the bar. Chromium draws these
-   per direction, so each one has to be zeroed by name. */
-.sheet::-webkit-scrollbar-button,
-.sheet::-webkit-scrollbar-button:single-button,
-.sheet::-webkit-scrollbar-button:double-button,
-.sheet::-webkit-scrollbar-button:vertical:start:decrement,
-.sheet::-webkit-scrollbar-button:vertical:end:increment,
-.sheet::-webkit-scrollbar-button:vertical:start:increment,
-.sheet::-webkit-scrollbar-button:vertical:end:decrement {
-  display: none;
-  width: 0; height: 0;
-  background: transparent;
-  background-image: none;
-}
-.sheet::-webkit-scrollbar-corner { background: transparent; }
-.sheet::-webkit-resizer { display: none; }
-@keyframes sheet-in { from { opacity: 0; transform: translateY(14px); } }
-
-.sheet .top { display: flex; align-items: flex-start; gap: 20px; flex-wrap: wrap; }
-.sheet h2 { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); }
-.sheet .sub { margin: 2px 0 0; font-size: 13.5px; color: var(--ink-soft); }
-.sheet .legend { margin-left: auto; font-size: 12.5px; color: var(--ink-soft); text-align: right; white-space: nowrap; }
-
-.sheet .close {
-  flex: none;
-  width: 36px; height: 36px; border: 0; border-radius: 50%;
-  background: var(--blue); color: #fff;
-  font-size: 18px; line-height: 1; cursor: pointer;
-  display: grid; place-items: center;
-  transition: background .16s ease, transform .16s ease;
-}
-.sheet .close:hover { background: var(--blue-dark); transform: scale(1.06); }
-
-.filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 22px; }
-.filters button {
-  font: inherit; font-size: 13.5px; font-weight: 600;
-  padding: 7px 16px; border-radius: 999px;
-  border: 1.5px solid var(--line); background: #fff; color: var(--ink);
-  cursor: pointer; transition: border-color .14s, background .14s, color .14s;
-}
-.filters button:hover { border-color: var(--blue); }
-.filters button[aria-pressed="true"] { background: #F1304F; border-color: #F1304F; color: #fff; }
-
-.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
-.card-idea {
-  display: flex; flex-direction: column; gap: 12px;
-  text-align: left; font: inherit;
-  padding: 14px 16px 16px;
-  border: 1.5px solid var(--line); border-radius: 14px;
-  background: #fff; cursor: pointer;
-  transition: border-color .14s, transform .14s, box-shadow .14s;
-}
-.card-idea:hover { border-color: var(--blue); transform: translateY(-2px); box-shadow: 0 10px 24px rgba(16,19,26,.07); }
-.card-idea[aria-current="true"] { border-color: var(--blue); border-width: 2px; }
-.card-idea .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.card-idea .n {
-  font-size: 12.5px; font-weight: 800; color: #fff;
-  background: var(--blue); border-radius: 999px; padding: 3px 11px;
-}
-.card-idea .mini { display: flex; gap: 3px; }
-.card-idea .mini img { width: 22px; height: auto; display: block; }
-.card-idea h3 { margin: 0; font-size: 16px; font-weight: 800; line-height: 1.2; color: var(--blue); }
-
-/* Ideas with nothing to open yet still appear — they are part of the set */
-.card-idea.soon { cursor: default; border-style: dashed; }
-.card-idea.soon:hover { border-color: var(--line); transform: none; box-shadow: none; }
-.card-idea.soon h3 { color: var(--ink-soft); }
-.card-idea.soon .n { background: #B9BFCB; }
-.card-idea .soon-note { font-size: 11.5px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .05em; }
-
-.sheet .none { font-size: 14px; color: var(--ink-soft); padding: 20px 2px; }
-
-@media (max-width: 1040px) {
-  .sheet .legend { display: none; }
-}
-
+/* ---------------- Phones and narrow windows ---------------- */
 @media (max-width: 760px) {
-  .scrim { padding: 10px; }
-  .sheet { padding: 20px 18px 22px; }
-  .sheet .legend { display: none; }
-  .sheet .close { margin-left: auto; }   /* with the legend gone, keep it on the right */
+  :root { --gutter: 18px; --foot: 0px; }
+  .page { justify-content: flex-start; padding: 22px 0 28px; }
+  .wrap { gap: 20px; }
+  .hero { padding: 26px 24px 24px; border-radius: 22px; }
+  .hero h1 { font-size: clamp(25px, 7.4vw, 34px); }
+  .hero p { font-size: 14.5px; }
+  .choices { grid-template-columns: 1fr; gap: 16px; }
+  .card { border-radius: 20px; }
+  .card .band { height: 78px; }
+  .card .band svg { width: 36px; }
+  .card .body { padding: 18px 20px 18px; }
+  .card h2 { font-size: 20px; }
+  .card p { font-size: 14px; }
+  /* the mark joins the flow rather than floating over the cards */
+  .logo { position: static; transform: none; height: 42px; margin: 10px auto 0; }
 }
 
-@media (max-width: 1040px) {
-  html, body { overflow: auto; }
-  .slide { height: auto; grid-template-columns: 1fr; gap: 0; padding-bottom: 110px; }
-  .hero { border-radius: 0 0 26px 26px; padding: 26px 22px; margin-top: 0; }
-  .cols { padding: 0 22px; }
-  .show { padding: 22px; height: auto; }
-  .frame-wrap { height: 62vh; }
-  .meta { grid-template-columns: 1fr; }
-  .meta .divider { border-left: 0; border-top: 2px solid #E1E5EE; padding: 18px 0 0; }
-  .nav.prev { left: 14px; } .nav.next { right: 14px; }
-  .logo { height: 44px; }
-
-  /* Stacked, the page scrolls under the bar, so give it a solid ground */
-  body::after {
-    content: "";
-    position: fixed; left: 0; right: 0; bottom: 0; height: 92px;
-    background: #fff;
-    box-shadow: 0 -6px 18px rgba(16, 19, 26, .08);
-    z-index: 1;
-  }
-  .logo, .nav { z-index: 2; }
+/* ---------------- Short windows and embeds ---------------- */
+@media (min-width: 761px) and (max-height: 640px) {
+  :root { --foot: 72px; }
+  .page { padding: 20px 0 var(--foot); }
+  .wrap { gap: 18px; }
+  .hero { padding: 20px 28px 20px; border-radius: 22px; }
+  .hero .eyebrow { margin-bottom: 6px; font-size: 11.5px; }
+  .hero h1 { margin-bottom: 7px; }
+  .card .body { gap: 6px; }
+  .logo { height: 40px; bottom: 12px; }
 }
 </style>
 </head>
 <body>
 
-<div class="slide">
+<div class="page">
+  <div class="wrap">
+    <header class="hero">
+      <p class="eyebrow">Bundle</p>
+      <h1>Pick a set of examples.</h1>
+      <p>Everything in here is live and clickable — working prototypes in the browser, not screenshots of them.</p>
+    </header>
 
-  <!-- The pitch -->
-  <section class="pitch">
-    <div class="hero">
-      <h1><span class="num" id="num">01</span>_<span id="title">—</span></h1>
-      <p class="sub" id="subtitle"></p>
-      <div class="label">The learning opportunity:</div>
-      <div class="body" id="opportunity"></div>
-    </div>
-
-    <div class="cols">
-      <div class="label">The idea:</div>
-      <ul id="idea"></ul>
-      <div class="label">Why it works:</div>
-      <ul id="why"></ul>
-    </div>
-  </section>
-
-  <!-- The prototype -->
-  <section class="show">
-    <div class="frame-wrap" id="frameWrap">
-      <iframe id="frame" title="Prototype" allow="fullscreen"></iframe>
-      <button class="expand" id="expand" type="button" title="Open full screen" aria-label="Open the prototype full screen">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M15 3h6v6M21 3l-7 7M9 21H3v-6M3 21l7-7"/>
-        </svg>
-      </button>
-    </div>
-
-    <div class="meta">
-      <div>
-        <span class="label">Where we’d use it:</span>
-        <div class="tags" id="tags"></div>
-      </div>
-      <div class="divider">
-        <div class="effort-head">
-          <span class="label" style="margin:0">Effort:</span>
-          <span class="effort-pill"><span class="dot">!</span><span id="effortLabel"></span></span>
+    <main class="choices">
+      <a class="card open" href="./gamification.html" id="gamification">
+        <div class="band">
+          <!-- controller -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6.5 7h11a4.5 4.5 0 0 1 4.4 3.6l.9 5a3.1 3.1 0 0 1-5.6 2.4L15.6 16H8.4l-1.6 2a3.1 3.1 0 0 1-5.6-2.4l.9-5A4.5 4.5 0 0 1 6.5 7Z"/>
+            <path d="M7 10.5v3M5.5 12h3"/>
+            <circle cx="16.2" cy="11.4" r=".9" fill="#fff" stroke="none"/>
+            <circle cx="18.3" cy="13.3" r=".9" fill="#fff" stroke="none"/>
+          </svg>
         </div>
-        <div class="pads" id="pads" role="img"></div>
-      </div>
-    </div>
+        <div class="body">
+          <h2>Gamification prototypes</h2>
+          <p>Twenty-three ideas for making learning worth doing, each one built as a prototype you can actually play with. Start at the first and work along.</p>
+          <div class="foot">
+            <span class="pill">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              23 examples, all live
+            </span>
+            <span class="go" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </span>
+          </div>
+        </div>
+      </a>
 
-    <button class="view-all" id="viewAll" type="button">View all prototypes</button>
-  </section>
-</div>
-
-<div class="scrim" id="lightbox" hidden>
-  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
-    <div class="top">
-      <div>
-        <h2 id="sheetTitle"></h2>
-        <p class="sub">Jump straight to any idea</p>
+      <div class="card locked" id="animation" role="button" aria-disabled="true" tabindex="0"
+           aria-label="Animation examples — in development, not available yet">
+        <span class="lock" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="10.5" width="16" height="10.5" rx="2.5"/>
+            <path d="M8 10.5V7.4a4 4 0 0 1 8 0v3.1"/>
+          </svg>
+        </span>
+        <div class="band">
+          <!-- play / film -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2.5" y="4.5" width="19" height="15" rx="3"/>
+            <path d="M2.5 9h19M7 4.5V9M17 4.5V9"/>
+            <path d="M10.6 12.2v4.1l3.6-2-3.6-2.1Z" fill="#fff" stroke="none"/>
+          </svg>
+        </div>
+        <div class="body">
+          <h2>Animation examples</h2>
+          <p>Short animated explainers and motion pieces. Being built at the moment — this one opens when there is something worth looking at in it.</p>
+          <div class="foot">
+            <span class="pill">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 1.8"/></svg>
+              In development
+            </span>
+            <span class="go" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </span>
+          </div>
+        </div>
       </div>
-      <p class="legend" id="legend"></p>
-      <button class="close" id="closeSheet" type="button" aria-label="Close">×</button>
-    </div>
-    <div class="filters" id="filters"></div>
-    <div class="cards" id="cards"></div>
-    <p class="none" id="noneFound" hidden></p>
+    </main>
+
+    <p class="note" id="note">Both sets open in this window.</p>
+  </div>
+
+  <div class="logo">
+    <img src="./assets/Hero-Header-Block-Logo.png" alt="Bundle">
   </div>
 </div>
 
-<div class="logo">
-  <img src="./assets/Hero-Header-Block-Logo.png" alt="Bundle">
-</div>
+<script>
+/* The locked card does nothing, but it says so when it is pressed —
+   silence reads as a broken link. */
+const locked = document.getElementById('animation');
+const note = document.getElementById('note');
+const NOTE_DEFAULT = note.textContent;
+let noteTimer = 0;
 
-<button class="nav prev" id="prev" type="button" aria-label="Previous prototype">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
-</button>
-<button class="nav next" id="next" type="button" aria-label="Next prototype">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-</button>
-
-<script type="module">
-import { prototypes, ideas, topics } from './shell/content.js';
-
-const frame = document.getElementById('frame');
-const frameWrap = document.getElementById('frameWrap');
-const pitch = document.querySelector('.pitch');
-
-const MAX_EFFORT = 5;
-/** What each rating means in plain words, shown next to the controllers. */
-/* The 1-5 rating: what it is called, and whether it carries a warning.
-   `warn` is amber, `alert` is red, and the first two carry nothing. */
-const EFFORT = [
-  { label: 'Easy | 1 day', level: null },
-  { label: 'Straightforward', level: null },
-  { label: 'You’ll probably want some help', level: 'warn' },
-  { label: 'Specialist build', level: 'alert' },
-  { label: 'Call the game developers', level: 'alert' },
-];
-const EFFORT_LABEL = EFFORT.map((e) => e.label);
-
-/** The pill next to "Effort:" — the warning dot only shows when the
-    rating has one, and "Easy | 1 day" keeps its divider thin. */
-function renderEffortPill(effort) {
-  const pill = document.querySelector('.effort-pill');
-  const { label, level } = EFFORT[effort - 1] ?? EFFORT[0];
-  pill.replaceChildren();
-
-  if (level) {
-    const dot = document.createElement('span');
-    dot.className = `dot ${level}`;
-    dot.setAttribute('aria-hidden', 'true');
-    dot.textContent = '!';
-    pill.append(dot);
-  } else {
-    pill.style.paddingLeft = '';
-  }
-  pill.style.paddingLeft = level ? '' : '15px';
-
-  const text = document.createElement('span');
-  text.id = 'effortLabel';
-  label.split(' | ').forEach((part, i) => {
-    if (i) {
-      const sep = document.createElement('span');
-      sep.className = 'sep';
-      sep.textContent = '|';
-      text.append(sep);
-    }
-    text.append(document.createTextNode(i ? ` ${part}` : `${part} `));
-  });
-  if (!label.includes(' | ')) text.textContent = label;
-  pill.append(text);
+function refuse() {
+  locked.classList.remove('nudge');
+  void locked.offsetWidth;          // restart the animation
+  locked.classList.add('nudge');
+  note.textContent = 'Animation examples are still being built — there is nothing in there yet.';
+  clearTimeout(noteTimer);
+  noteTimer = setTimeout(() => { note.textContent = NOTE_DEFAULT; }, 3200);
 }
 
-const pad = (n) => String(n).padStart(2, '0');
-const bullets = (host, lines, icon) => host.replaceChildren(...lines.map((text) => {
-  const li = document.createElement('li');
-  const img = document.createElement('img');
-  img.src = icon;
-  img.alt = '';
-  const span = document.createElement('span');
-  span.textContent = text;
-  li.append(img, span);
-  return li;
-}));
-
-let index = 0;
-
-function render(i) {
-  const p = prototypes[i];
-
-  document.getElementById('num').textContent = pad(p.n ?? i + 1);
-  document.getElementById('title').textContent = p.title;
-  document.getElementById('subtitle').textContent = p.subtitle ?? '';
-  document.getElementById('opportunity').replaceChildren(...[].concat(p.opportunity ?? []).map((text) => {
-    const node = document.createElement('p');
-    node.textContent = text;
-    return node;
-  }));
-
-  bullets(document.getElementById('idea'), [].concat(p.idea), './assets/idea_icon.png');
-  bullets(document.getElementById('why'), [].concat(p.why), './assets/carbon_gamification.png');
-
-  document.getElementById('tags').replaceChildren(...(p.tags ?? []).map((t) => {
-    const span = document.createElement('span');
-    span.textContent = t;
-    return span;
-  }));
-
-  renderEffortPill(p.effort);
-  const pads = document.getElementById('pads');
-  pads.setAttribute('aria-label', `Effort: ${p.effort} out of ${MAX_EFFORT}`);
-  pads.replaceChildren(...Array.from({ length: MAX_EFFORT }, (_, n) => {
-    const img = document.createElement('img');
-    img.src = n < p.effort ? './assets/controller_full.png' : './assets/controller_empty.png';
-    img.alt = '';
-    return img;
-  }));
-
-  frame.title = p.title;
-  frame.src = p.url;
-  pitch.scrollTop = 0;
-
-  history.replaceState(null, '', `#${p.id}`);
-}
-
-/** Swap with a short slide so the direction of travel is readable. */
-function go(next, dir = next > index ? 1 : -1) {
-  const target = (next + prototypes.length) % prototypes.length;
-  if (target === index && frame.src) return;
-  index = target;
-
-  frameWrap.style.opacity = '0';
-  frameWrap.style.transform = `translateX(${-dir * 26}px)`;
-
-  setTimeout(() => {
-    render(index);
-    frameWrap.style.transform = `translateX(${dir * 26}px)`;
-    requestAnimationFrame(() => {
-      frameWrap.style.opacity = '1';
-      frameWrap.style.transform = 'none';
-    });
-  }, 200);
-}
-
-document.getElementById('prev').addEventListener('click', () => go(index - 1, -1));
-document.getElementById('next').addEventListener('click', () => go(index + 1, 1));
-document.getElementById('expand').addEventListener('click', () => frameWrap.requestFullscreen?.());
-
-document.addEventListener('keydown', (e) => {
-  if (e.target.closest('input, textarea')) return;
-  if (e.key === 'Escape' && !lightbox.hidden) return closeSheet();
-  if (!lightbox.hidden) return;                 // arrows drive the carousel, not the sheet
-  if (e.key === 'ArrowLeft') go(index - 1, -1);
-  if (e.key === 'ArrowRight') go(index + 1, 1);
+locked.addEventListener('click', refuse);
+locked.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); refuse(); }
 });
-
-/* ============================================================
-   The "view all" sheet: every idea in the deck, filtered by topic.
-   Ideas that have no prototype yet are still listed — the set is
-   the point — they just have nothing to open.
-   ============================================================ */
-const lightbox = document.getElementById('lightbox');
-const cardsEl = document.getElementById('cards');
-const filtersEl = document.getElementById('filters');
-const noneEl = document.getElementById('noneFound');
-let filter = null;                              // null = everything
-
-document.getElementById('sheetTitle').textContent = `All ${ideas.length} prototypes`;
-document.getElementById('legend').textContent =
-  `Controllers show effort — from “${EFFORT_LABEL[0]}” to “${EFFORT_LABEL[MAX_EFFORT - 1]}”`;
-
-function renderFilters() {
-  const chip = (label, value) => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.textContent = label;
-    b.setAttribute('aria-pressed', String(filter === value));
-    b.addEventListener('click', () => { filter = value; renderFilters(); renderCards(); });
-    return b;
-  };
-  filtersEl.replaceChildren(chip('All', null), ...topics.map((t) => chip(t, t)));
-}
-
-function renderCards() {
-  const shown = ideas.filter((idea) => !filter || idea.topics.includes(filter));
-  noneEl.hidden = shown.length > 0;
-  if (!shown.length) noneEl.textContent = `Nothing tagged “${filter}” yet.`;
-
-  cardsEl.replaceChildren(...shown.map((idea) => {
-    const built = idea.prototype && prototypes.some((p) => p.id === idea.prototype);
-    const card = document.createElement(built ? 'button' : 'div');
-    card.className = 'card-idea' + (built ? '' : ' soon');
-    if (built) {
-      card.type = 'button';
-      card.setAttribute('aria-current', String(prototypes[index].id === idea.prototype));
-      card.addEventListener('click', () => {
-        closeSheet();
-        go(prototypes.findIndex((p) => p.id === idea.prototype));
-      });
-    }
-
-    const row = document.createElement('div');
-    row.className = 'row';
-    const n = document.createElement('span');
-    n.className = 'n';
-    n.textContent = `${pad(idea.n)}/${pad(ideas.length)}`;
-    const mini = document.createElement('div');
-    mini.className = 'mini';
-    mini.setAttribute('role', 'img');
-    mini.setAttribute('aria-label', `Effort: ${idea.effort} out of ${MAX_EFFORT}`);
-    mini.append(...Array.from({ length: MAX_EFFORT }, (_, k) => {
-      const img = document.createElement('img');
-      img.src = k < idea.effort ? './assets/controller_full.png' : './assets/controller_empty.png';
-      img.alt = '';
-      return img;
-    }));
-    row.append(n, mini);
-
-    const h3 = document.createElement('h3');
-    h3.textContent = idea.title;
-    card.append(row, h3);
-
-    if (!built) {
-      const note = document.createElement('span');
-      note.className = 'soon-note';
-      note.textContent = 'No prototype yet';
-      card.append(note);
-    }
-    return card;
-  }));
-}
-
-function openSheet() {
-  filter = null;                      // always opens on the full set
-  renderFilters();
-  renderCards();
-  lightbox.hidden = false;
-  // Nothing should scroll behind the sheet — including the page itself,
-  // which has its own scrollbar once the layout stacks.
-  document.body.style.overflow = 'hidden';
-  holdHeight();
-  document.getElementById('closeSheet').focus();
-}
-
-/** Pin the sheet to the height the whole list needs, so filtering down
-    to three cards does not shrink the panel under the cursor. */
-function holdHeight() {
-  const sheet = document.querySelector('.sheet');
-  sheet.style.minHeight = '';
-  const full = sheet.getBoundingClientRect().height;
-  sheet.style.minHeight = `${Math.round(full)}px`;
-}
-
-function closeSheet() {
-  lightbox.hidden = true;
-  document.body.style.overflow = '';
-  document.querySelector('.sheet').style.minHeight = '';
-}
-
-// A resize changes how many cards fit per row, so take the height again
-window.addEventListener('resize', () => { if (!lightbox.hidden) holdHeight(); });
-
-document.getElementById('viewAll').addEventListener('click', openSheet);
-document.getElementById('closeSheet').addEventListener('click', closeSheet);
-lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeSheet(); });
-
-// Deep link support: index.html#photo-hunt opens that one directly.
-// Changing only the hash does not reload the page, so follow it live too
-// (replaceState inside render() does not fire this event).
-window.addEventListener('hashchange', () => {
-  const i = prototypes.findIndex((p) => p.id === location.hash.slice(1));
-  if (i >= 0 && i !== index) go(i);
-});
-
-const start = prototypes.findIndex((p) => p.id === location.hash.slice(1));
-index = start >= 0 ? start : 0;
-render(index);
+locked.addEventListener('animationend', () => locked.classList.remove('nudge'));
 </script>
 
 </body>

@@ -1,640 +1,832 @@
 /* ============================================================
    16 — Give learners a taste of mastery
 
-   A desk workstation, five things on it, three places each one can
-   go. The learner picks an item up by clicking it and puts it down by
-   clicking a slot — no questions anywhere.
+   A one-page report stands on the desk and goes to a client at five.
+   The review is done by clicking the parts of the page that are
+   wrong; a flag tab appears beside whatever has been flagged, and
+   clicking it again takes the flag off. No questions anywhere.
 
-   Beat 1 runs with an experienced assessor's kit switched on: the
-   right slot glows mint with the reason floating beside it, and a
-   running note explains each placement. Beat 2 is a different desk
-   with all of that switched off. Beat 3 is the beat 1 desk again,
-   restored exactly, still bare — and then the two runs are compared
-   item by item.
+   Three passes, each ended by "Send it":
+     1  the kit an experienced reviewer carries is switched on —
+        every genuine problem pulses amber with its reason floating
+        beside it, and a running note explains each flag;
+     2  a different report with its own problems and none of the kit;
+     3  Friday's report again, bare.
+
+   Only the third pass is graded, against the first: the same three
+   problems, the same page, nothing lent to them.
    ============================================================ */
 
 import { THREE, createStage, addLightRig, mat, box, roundedBox, canvasTexture, tween, ease, wait } from '../../shared/engine.js';
 import { el, toast, showResult, hideLoading, statBar } from '../../shared/ui.js';
 import { createBridge } from '../../shared/embed.js';
-import { meta, counters, items, beats, messes, ending, results } from './content.js';
+import { meta, beats, docs, regionOrder, results, ending } from './content.js';
 
 const bridge = createBridge('taste-of-mastery');
 
-const DESK_TOP = 1.02;          // world y of the desk surface
-const MESS_FOR = ['A', 'B', 'A'];   // beats 1 and 3 share a desk on purpose
+/* ---------------- Measurements ----------------
+   The page is drawn on a 1024x1448 canvas and stands up on the desk
+   at the same aspect, so a rect in canvas fractions maps straight
+   onto a rect of the standing page. */
+const CANVAS_W = 1024;
+const CANVAS_H = 1448;
+const PAGE_W = 3.1;
+const PAGE_H = PAGE_W * (CANVAS_H / CANVAS_W);
+const DESK_Y = 0.95;
+const PAGE_Z = -0.3;
+const PAGE_TILT = -0.08;
 
-const MINT = 0x5fe0b0;
-const MINT_INK = '#12A177';
-const AMBER = 0xe0a32a;
-
-/* Where every slot actually is. `kind` picks the marker shape, `aim`
-   is the lamp's heading in radians, `bump` lifts the item in a small
-   arc while it travels (wrong for the monitor and chair, whose stems
-   stretch to whatever height they are at). */
-const SLOT_LAYOUT = {
-  'monitor-low':   { kind: 'bar',  pos: [0, 1.27, -0.85] },
-  'monitor-eye':   { kind: 'bar',  pos: [0, 1.50, -0.85] },
-  'monitor-high':  { kind: 'bar',  pos: [0, 1.78, -0.85] },
-
-  'keyboard-edge': { kind: 'keys', pos: [0, DESK_TOP + 0.04, 1.08], bump: true },
-  'keyboard-in':   { kind: 'keys', pos: [0, DESK_TOP + 0.04, 0.58], bump: true },
-  'keyboard-back': { kind: 'keys', pos: [0, DESK_TOP + 0.04, -0.06], bump: true },
-
-  'mouse-beside':  { kind: 'mouse', pos: [1.08, DESK_TOP + 0.05, 0.58], bump: true },
-  'mouse-across':  { kind: 'mouse', pos: [2.45, DESK_TOP + 0.05, 0.30], bump: true },
-  'mouse-edge':    { kind: 'mouse', pos: [0.66, DESK_TOP + 0.05, 1.20], bump: true },
-
-  'chair-low':     { kind: 'seat', pos: [0, 0.40, 1.95] },
-  'chair-fit':     { kind: 'seat', pos: [0, 0.58, 1.95] },
-  'chair-high':    { kind: 'seat', pos: [0, 0.78, 1.95] },
-
-  'lamp-glare':    { kind: 'lamp', pos: [-1.15, DESK_TOP, -0.90], aim: -1.57, bump: true },
-  'lamp-side':     { kind: 'lamp', pos: [-2.55, DESK_TOP, 0.15],  aim: -2.30, bump: true },
-  'lamp-behind':   { kind: 'lamp', pos: [2.55, DESK_TOP, 1.15],   aim: 1.00,  bump: true },
+/* Where the six reviewable parts sit on the page, in canvas
+   fractions with the origin at the top left. The layout is the same
+   for both documents; only the words change. */
+const LAYOUT = {
+  header: { x: 0.07, y: 0.030, w: 0.86, h: 0.150 },
+  client: { x: 0.07, y: 0.190, w: 0.86, h: 0.098 },
+  para:   { x: 0.07, y: 0.300, w: 0.86, h: 0.158 },
+  chart:  { x: 0.07, y: 0.472, w: 0.86, h: 0.196 },
+  table:  { x: 0.07, y: 0.682, w: 0.86, h: 0.205 },
+  footer: { x: 0.07, y: 0.900, w: 0.86, h: 0.070 },
 };
 
-/* Lookups built once from the content. */
-const ITEM = Object.fromEntries(items.map((i) => [i.id, i]));
-const SLOT = {};
-const OWNER = {};
-for (const it of items) for (const s of it.slots) { SLOT[s.id] = s; OWNER[s.id] = it.id; }
-const CORRECT = Object.fromEntries(items.map((i) => [i.id, i.slots.find((s) => s.correct).id]));
+const AMBER = 0xe0a32a;
+const BLUE = 0x2757e2;
+const AMBER_INK = '#8F6310';
+const PAPER = '#FBFAF6';
+const INK = '#10131A';
+const INK_DIM = '#4B5162';
+const RULE = 'rgba(16,19,26,0.14)';
 
 /* ---------------- Stage ---------------- */
 const stage = createStage({
   container: document.getElementById('stage'),
-  fov: 40,
-  // Three-quarter view: the chair and the person on it sit between the
-  // camera and the desk head-on, so the camera stands off to one side.
-  cameraPos: [3.1, 3.3, 6.5],
-  lookAt: [0, 1.3, 0.3],
-  background: 0xe7ebf2,
-  fog: [20, 48],
-  fit: { width: 9.6, height: 6.2 },
+  fov: 38,
+  cameraPos: [0.9, 3.5, 7.4],
+  lookAt: [0.9, 2.9, 0],
+  background: 0x161b22,
+  fog: [22, 52],
+  fit: { width: 7.4, height: 6.4 },
   orbitLimits: {
-    minPolarAngle: 0.62, maxPolarAngle: 1.32,
-    minAzimuthAngle: 0.0, maxAzimuthAngle: 0.95,
-    minDistance: 6, maxDistance: 12,
+    minPolarAngle: 1.05, maxPolarAngle: 1.62,
+    minAzimuthAngle: -0.26, maxAzimuthAngle: 0.26,
+    minDistance: 6, maxDistance: 11,
   },
 });
 
 addLightRig(stage.scene, {
-  sky: 0xf3f6fb, ground: 0xbac3cf, hemi: 1.0,
-  keyColor: 0xfff4e4, keyIntensity: 1.7, keyPos: [-6, 12, 8],
-  shadowSize: 12, fillColor: 0x6d8ec0, fillIntensity: 0.5,
+  sky: 0xe4ebf4, ground: 0x2a3038, hemi: 1.0,
+  keyColor: 0xfff4e4, keyIntensity: 1.35, keyPos: [4, 11, 9],
+  shadowSize: 10, fillColor: 0x4a6f9c, fillIntensity: 0.6,
 });
 
-/* ---------------- The room and the desk ---------------- */
+/* ---------------- Room, desk, props ---------------- */
 {
-  const floor = box(40, 0.2, 26, 0xcfd6e0, { roughness: 1 });
+  const floor = box(30, 0.2, 20, 0x6c737d, { roughness: 1 });
   floor.position.y = -0.1;
-  const wall = box(40, 10, 0.3, 0xedf0f5, { roughness: 0.98 });
-  wall.position.set(0, 5, -2.3);
+  const wall = box(30, 11, 0.3, 0xcbd2db, { roughness: 0.95 });
+  wall.position.set(0, 5.5, -3.0);
   stage.scene.add(floor, wall);
 
-  const top = new THREE.Mesh(roundedBox(6.6, 0.14, 2.7, 0.05), mat(0xd9cdb8, { roughness: 0.8 }));
-  top.position.set(0, DESK_TOP - 0.07, 0);
+  const top = new THREE.Mesh(roundedBox(8.2, 0.16, 3.4, 0.05), mat(0xd9cdb8, { roughness: 0.8 }));
+  top.position.set(0, DESK_Y - 0.08, 0.1);
   top.castShadow = true;
   top.receiveShadow = true;
   stage.scene.add(top);
 
-  for (const x of [-3.1, 3.1]) {
-    for (const z of [-1.1, 1.1]) {
-      const leg = box(0.12, DESK_TOP - 0.14, 0.12, 0x5b6573, { roughness: 0.6 });
-      leg.position.set(x, (DESK_TOP - 0.14) / 2, z);
+  for (const x of [-3.8, 3.8]) {
+    for (const z of [-1.3, 1.5]) {
+      const leg = box(0.14, DESK_Y - 0.16, 0.14, 0x5b6573, { roughness: 0.6 });
+      leg.position.set(x, (DESK_Y - 0.16) / 2, z);
       stage.scene.add(leg);
     }
   }
 
-  // Paperwork, so "light on the page" has a page to land on
-  const paper = box(0.9, 0.03, 0.66, 0xf8f6f0, { roughness: 0.95 });
-  paper.position.set(-2.0, DESK_TOP + 0.015, 0.55);
-  paper.rotation.y = 0.18;
-  stage.scene.add(paper);
+  // A mug and a couple of filed pages, so the desk is somebody's desk
+  const mug = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.18, 0.34, 16), mat(BLUE, { roughness: 0.7 }));
+  mug.position.set(2.65, DESK_Y + 0.17, 0.75);
+  mug.castShadow = true;
+  const handle = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.028, 6, 14), mat(BLUE, { roughness: 0.7 }));
+  handle.position.set(2.88, DESK_Y + 0.18, 0.75);
+  handle.rotation.y = Math.PI / 2;
+  stage.scene.add(mug, handle);
+
+  for (let i = 0; i < 3; i++) {
+    const sheet = box(1.5, 0.02, 1.05, 0xf6f3ec, { roughness: 0.95 });
+    sheet.position.set(-2.75 + i * 0.03, DESK_Y + 0.012 + i * 0.022, 0.7);
+    sheet.rotation.y = -0.16 + i * 0.05;
+    stage.scene.add(sheet);
+  }
+
+  const pen = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.62, 8), mat(0xe0234e, { roughness: 0.6 }));
+  pen.rotation.set(Math.PI / 2, 0, 0.42);
+  pen.position.set(-1.5, DESK_Y + 0.03, 1.05);
+  pen.castShadow = true;
+  stage.scene.add(pen);
 }
 
-/* ---------------- The five items ---------------- */
-const rig = {};
+/* ---------------- The standing page ---------------- */
+const pageGroup = new THREE.Group();
+pageGroup.position.set(0, DESK_Y + 0.12 + PAGE_H / 2, PAGE_Z);
+pageGroup.rotation.x = PAGE_TILT;
+stage.scene.add(pageGroup);
 
-/* Monitor: screen on a stem that stretches down to the desk, so the
-   same group reads correctly at any of its three heights. */
+const backing = box(PAGE_W + 0.07, PAGE_H + 0.07, 0.05, 0xe4dfd3, { roughness: 0.9 });
+backing.position.z = -0.03;
+pageGroup.add(backing);
+
+const pagePlane = new THREE.Mesh(
+  new THREE.PlaneGeometry(PAGE_W, PAGE_H),
+  new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.92, metalness: 0 }),
+);
+pagePlane.receiveShadow = true;
+pageGroup.add(pagePlane);
+
+/* A holder the page sits in, so it is standing rather than floating. */
 {
-  const g = new THREE.Group();
-  const panel = box(1.26, 0.52, 0.07, 0x2f3540, { roughness: 0.55 });
-  const screen = box(1.14, 0.42, 0.075, 0x1a2230, { roughness: 0.3, cast: false });
-  screen.position.z = 0.01;
-  const stem = box(0.12, 1, 0.12, 0x4b515c, { roughness: 0.6 });
-  const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.38, 0.05, 20), mat(0x4b515c, { roughness: 0.6 }));
-  foot.castShadow = true;
-  g.add(panel, screen, stem, foot);
-  stage.scene.add(g);
-  stage.pickable(g, { kind: 'item', id: 'monitor' });
+  const lip = box(PAGE_W + 0.5, 0.1, 0.3, 0x5b6573, { roughness: 0.6 });
+  lip.position.set(0, DESK_Y + 0.05, PAGE_Z + 0.16);
+  const strut = box(0.16, PAGE_H * 0.5, 0.12, 0x5b6573, { roughness: 0.6 });
+  strut.position.set(0, DESK_Y + PAGE_H * 0.25, PAGE_Z - 0.16);
+  strut.rotation.x = 0.1;
+  stage.scene.add(lip, strut);
+}
 
-  rig.monitor = {
-    group: g,
-    screen,
-    fit(y) {
-      const len = Math.max(0.06, y - 0.26 - DESK_TOP);
-      stem.scale.y = len;
-      stem.position.y = -0.26 - len / 2;
-      foot.position.y = -0.26 - len - 0.02;
-    },
+/* ---------------- The six reviewable regions ----------------
+   Each one is a highlight plane, an amber outline, a host for the
+   floating reason tag, an invisible hit target, and a flag tab that
+   sticks out of the left edge of the page once flagged. */
+function localRect(r) {
+  return {
+    cx: (r.x + r.w / 2 - 0.5) * PAGE_W,
+    cy: (0.5 - (r.y + r.h / 2)) * PAGE_H,
+    w: r.w * PAGE_W,
+    h: r.h * PAGE_H,
   };
 }
 
-/* Keyboard */
-{
+function flatPlane(w, h, colour, opacity, order) {
+  const m = new THREE.Mesh(
+    new THREE.PlaneGeometry(w, h),
+    new THREE.MeshBasicMaterial({ color: colour, transparent: true, opacity, depthWrite: false }),
+  );
+  m.renderOrder = order;
+  return m;
+}
+
+/** Four thin bars making a rectangle outline, as one group. */
+function outlineRect(w, h, t, colour) {
   const g = new THREE.Group();
-  const body = new THREE.Mesh(roundedBox(1.5, 0.08, 0.46, 0.03), mat(0xe6e8ec, { roughness: 0.7 }));
-  body.castShadow = true;
-  g.add(body);
-  for (let r = 0; r < 3; r++) {
-    const row = box(1.3, 0.02, 0.08, 0xb9bec8, { roughness: 0.9, cast: false });
-    row.position.set(0, 0.05, -0.13 + r * 0.12);
-    g.add(row);
+  for (const [bw, bh, bx, by] of [[w, t, 0, h / 2], [w, t, 0, -h / 2], [t, h, -w / 2, 0], [t, h, w / 2, 0]]) {
+    g.add(flatPlane(bw, bh, colour, 1, 7));
+    const bar = g.children[g.children.length - 1];
+    bar.position.set(bx, by, 0);
   }
-  stage.scene.add(g);
-  stage.pickable(g, { kind: 'item', id: 'keyboard' });
-  rig.keyboard = { group: g };
+  return g;
 }
 
-/* Mouse */
-{
-  const g = new THREE.Group();
-  const body = new THREE.Mesh(roundedBox(0.28, 0.1, 0.42, 0.05), mat(0xe6e8ec, { roughness: 0.6 }));
-  body.castShadow = true;
-  const split = box(0.02, 0.02, 0.2, 0xb9bec8, { roughness: 0.9, cast: false });
-  split.position.set(0, 0.05, -0.1);
-  g.add(body, split);
-  stage.scene.add(g);
-  stage.pickable(g, { kind: 'item', id: 'mouse' });
-  rig.mouse = { group: g };
+const regions = {};
+for (const id of regionOrder) {
+  const r = localRect(LAYOUT[id]);
+  const group = new THREE.Group();
+  group.position.set(r.cx, r.cy, 0);
+  pageGroup.add(group);
+
+  const fill = flatPlane(r.w, r.h, AMBER, 0, 6);
+  fill.position.z = 0.012;
+  fill.visible = false;
+
+  const outline = outlineRect(r.w + 0.04, r.h + 0.04, 0.025, AMBER);
+  outline.position.z = 0.016;
+  outline.visible = false;
+
+  const tagHost = new THREE.Group();
+  tagHost.visible = false;
+
+  // Invisible and in front of everything, so a click anywhere over
+  // the part counts and nothing drawn on the paper can swallow it.
+  const hit = flatPlane(r.w, r.h, 0xffffff, 0, 8);
+  hit.position.z = 0.05;
+
+  // The flag tab: a coloured stub off the left edge of the page
+  const tab = new THREE.Group();
+  const tabBody = box(0.34, Math.min(r.h * 0.62, 0.46), 0.07, BLUE, { roughness: 0.55 });
+  const pip = box(0.1, 0.1, 0.08, 0xffffff, { roughness: 0.7, cast: false });
+  pip.position.set(-0.06, 0, 0.005);
+  tab.add(tabBody, pip);
+  tab.position.set(-(PAGE_W / 2) - 0.1, 0, 0.02);
+  tab.visible = false;
+  tab.scale.setScalar(0.01);
+
+  group.add(fill, outline, tagHost, hit, tab);
+  stage.pickable(hit, { kind: 'region', id });
+  // The tab counts as part of its own region, so it can be clicked
+  // off again directly. Hidden tabs are skipped by the picker.
+  stage.pickable(tab, { kind: 'region', id });
+
+  regions[id] = { id, group, fill, outline, tagHost, hit, tab, rect: r };
 }
 
-/* Chair, with a faceless pawn riding on the seat so the height
-   actually means something. */
-{
-  const g = new THREE.Group();
-  const seat = new THREE.Mesh(roundedBox(0.84, 0.1, 0.8, 0.04), mat(0x3b4252, { roughness: 0.8 }));
-  seat.castShadow = true;
-  const back = new THREE.Mesh(roundedBox(0.8, 0.66, 0.1, 0.04), mat(0x3b4252, { roughness: 0.8 }));
-  back.position.set(0, 0.38, 0.38);
-  const post = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 1, 12), mat(0x4b515c, { roughness: 0.5 }));
-  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.56, 0.06, 5), mat(0x4b515c, { roughness: 0.5 }));
-  base.castShadow = true;
-
-  const skin = mat(0x6d7f99, { roughness: 0.85 });
-  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.23, 0.4, 6, 14), skin);
-  torso.position.set(0, 0.42, 0.06);
-  torso.castShadow = true;
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.19, 18, 14), skin);
-  head.position.set(0, 0.86, 0.02);
-  head.castShadow = true;
-  const thighL = box(0.2, 0.15, 0.56, 0x6d7f99, { roughness: 0.85 });
-  thighL.position.set(-0.17, 0.09, -0.26);
-  const thighR = thighL.clone();
-  thighR.position.x = 0.17;
-
-  g.add(seat, back, post, base, torso, head, thighL, thighR);
-  stage.scene.add(g);
-  stage.pickable(g, { kind: 'item', id: 'chair' });
-
-  rig.chair = {
-    group: g,
-    fit(y) {
-      const len = Math.max(0.08, y - 0.08);
-      post.scale.y = len;
-      post.position.y = -0.05 - len / 2;
-      base.position.y = -0.05 - len - 0.03;
-    },
-  };
-}
-
-/* Desk lamp: built pointing down its own -z, then turned to aim. */
-{
-  const g = new THREE.Group();
-  const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.26, 0.06, 18), mat(0x2757e2, { roughness: 0.6 }));
-  foot.position.y = 0.03;
-  foot.castShadow = true;
-  const arm = box(0.07, 0.72, 0.07, 0x2757e2, { roughness: 0.6 });
-  arm.position.set(0, 0.4, 0.06);
-  arm.rotation.x = 0.3;
-  const shade = new THREE.Mesh(new THREE.ConeGeometry(0.26, 0.3, 18, 1, true), mat(0x2757e2, { roughness: 0.6, side: THREE.DoubleSide }));
-  shade.position.set(0, 0.7, -0.16);
-  shade.rotation.x = -2.1;
-  shade.castShadow = true;
-  const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.1, 12, 10), new THREE.MeshBasicMaterial({ color: 0xfff0c4 }));
-  bulb.position.set(0, 0.63, -0.21);
-  g.add(foot, arm, shade, bulb);
-  stage.scene.add(g);
-  stage.pickable(g, { kind: 'item', id: 'lamp' });
-  rig.lamp = { group: g };
-}
-
-/* ---------------- Slot markers ---------------- */
-/* One group per slot: a thin marker you can see, an invisible pad
-   that is comfortable to click, and the reason tag that only ever
-   appears in beat one. */
-const slotNodes = {};
-for (const [id, L] of Object.entries(SLOT_LAYOUT)) {
-  const g = new THREE.Group();
-  g.position.set(...L.pos);
-  g.visible = false;
-
-  const skin = new THREE.MeshBasicMaterial({
-    color: 0xffffff, transparent: true, opacity: 0.55, depthWrite: false, side: THREE.DoubleSide,
-  });
-
-  let marker;
-  let pad;
-  if (L.kind === 'bar') {
-    marker = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.05, 0.12), skin);
-    pad = new THREE.Mesh(new THREE.BoxGeometry(1.45, 0.2, 0.4), hitMat());
-  } else if (L.kind === 'keys') {
-    marker = new THREE.Mesh(new THREE.BoxGeometry(1.52, 0.03, 0.48), skin);
-    pad = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.3, 0.5), hitMat());
-  } else if (L.kind === 'mouse') {
-    marker = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.03, 0.44), skin);
-    pad = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.3, 0.56), hitMat());
-  } else if (L.kind === 'seat') {
-    marker = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.03, 24), skin);
-    pad = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.16, 1.0), hitMat());
-  } else {
-    marker = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.03, 20), skin);
-    pad = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.4, 0.62), hitMat());
-  }
-  marker.renderOrder = 8;
-  pad.position.y = L.kind === 'lamp' ? 0.2 : 0;
-
-  // Tag sits on whichever side of the slot has room left on screen
-  const dir = L.pos[0] > 0.5 ? -1 : 1;
-  const tag = tagSprite(SLOT[id].tag);
-  tag.position.set(dir * 1.75, 0.46, 0.1);
-  tag.visible = false;
-
-  g.add(marker, pad, tag);
-  stage.scene.add(g);
-  stage.pickable(pad, { kind: 'slot', id });
-  slotNodes[id] = { group: g, marker, tag, skin };
-}
-
-function hitMat() {
-  return new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
-}
+/* The printed face of each document, built once and kept. */
+const pageTex = new Map();
 
 /* ---------------- UI ---------------- */
-document.getElementById('title').textContent = meta.title;
 const eyebrowEl = document.getElementById('eyebrow');
+const titleEl = document.getElementById('title');
 const hintEl = document.getElementById('hint');
-const boardEl = document.getElementById('board');
-const stats = statBar(document.getElementById('stats'), [
-  { id: 'beat', label: counters.beat, value: 1, max: beats.length },
-  { id: 'placed', label: counters.placed, value: 0, max: items.length },
-]);
+const board = document.getElementById('board');
+const sendBtn = document.getElementById('send');
+sendBtn.textContent = meta.sendLabel;
+sendBtn.addEventListener('click', send);
 document.getElementById('restart').addEventListener('click', restart);
+
+const stats = statBar(document.getElementById('stats'), [
+  { id: 'beat', label: meta.beatLabel, value: 1, max: beats.length },
+  { id: 'flagged', label: meta.flaggedLabel, value: 0 },
+]);
 
 /* ---------------- State ---------------- */
 const state = {
-  beatIndex: 0,
-  beat: beats[0].id,
+  beat: 1,
+  docId: beats[0].doc,
   supports: beats[0].supports,
-  held: null,
-  at: {},                 // itemId -> slotId the item is physically in
-  set: {},                // itemId -> true once the learner has placed it this beat
-  placements: {},         // beatId -> { itemId: slotId }  (what they chose)
-  notes: [],
+  flags: { 1: [], 2: [], 3: [] },
+  problems: Object.fromEntries(
+    Object.entries(docs).map(([id, doc]) => [id, regionOrder.filter((rid) => doc.regions[rid].problem)]),
+  ),
   busy: false,
-  over: false,
+  done: false,
   run: 0,
 };
 
+const doc = () => docs[state.docId];
+const beat = () => beats[state.beat - 1];
+const flagsNow = () => state.flags[state.beat];
+const problemsNow = () => state.problems[state.docId];
+
 stage.onPick((obj, data) => {
-  if (!data) return;
-  if (data.kind === 'item') take(data.id);
-  else if (data.kind === 'slot') place(data.id);
+  if (data?.kind === 'region') flag(data.id);
 });
 
-/* The glowing slot breathes, so "this one" reads without any text. */
-stage.onFrame((dt, t) => {
-  if (!state.supports || !state.held) return;
-  const n = slotNodes[CORRECT[state.held]];
-  if (!n) return;
-  n.skin.opacity = 0.7 + Math.sin(t * 3.4) * 0.22;
-  n.marker.scale.setScalar(1 + Math.sin(t * 3.4) * 0.04);
+stage.onFrame((_, t) => {
+  if (!state.supports) return;
+  const d = doc();
+  const flagged = flagsNow();
+  for (const id of problemsNow()) {
+    if (!d.regions[id].problem) continue;
+    const reg = regions[id];
+    if (!reg.fill.visible) continue;
+    const held = flagged.includes(id);
+    const pulse = held ? 0.12 : 0.13 + Math.sin(t * 2.9) * 0.085;
+    reg.fill.material.opacity = pulse;
+    for (const bar of reg.outline.children) bar.material.opacity = held ? 0.5 : 0.75 + Math.sin(t * 2.9) * 0.25;
+  }
 });
 
 stage.start();
 if (new URLSearchParams(location.search).has('debug')) {
-  window.__mastery = { state, take, place, restart };
+  window.__mastery = { state, flag, send, restart };
 }
 requestAnimationFrame(() => { hideLoading(); bridge.ready(); });
 restart();
 
+/* The page is a wall of text, so it is redrawn once the webfont has
+   actually arrived rather than left in the fallback face. */
+document.fonts?.ready?.then(() => {
+  for (const tex of pageTex.values()) tex.dispose();
+  pageTex.clear();
+  applyPage();
+  applyVisuals();
+});
+
 /* ============================================================
-   Picking things up and putting them down
+   Actions
    ============================================================ */
-async function take(itemId) {
-  if (state.busy || state.over || !ITEM[itemId]) return false;
-  state.held = state.held === itemId ? null : itemId;
-  showSlots();
-  render();
-  return true;
+
+/** Flag or unflag one part of the page. */
+async function flag(regionId) {
+  if (state.busy || state.done) return;
+  const spec = doc().regions[regionId];
+  if (!spec) return;
+  const flags = flagsNow();
+  const reg = regions[regionId];
+  const at = flags.indexOf(regionId);
+
+  // With the reviewer's kit on, a clean part cannot be flagged: the
+  // kit already knows it is clean and says so in one line.
+  if (state.supports && !spec.problem && at < 0) {
+    toast(spec.clean, '', 3000);
+    return;
+  }
+
+  if (at >= 0) {
+    flags.splice(at, 1);
+    if (!state.supports) toast(meta.unflaggedToast.replace('{part}', spec.label), '', 2400);
+    await popTab(reg.tab, false);
+  } else {
+    flags.push(regionId);
+    if (!state.supports) toast(meta.flaggedToast.replace('{part}', spec.label), '', 2400);
+    await popTab(reg.tab, true);
+  }
+
+  stats.set('flagged', flags.length);
+  renderBoard();
+  setHint();
 }
 
-async function place(slotId) {
-  if (state.busy || state.over) return false;
-  const itemId = state.held;
-  const slot = SLOT[slotId];
-  if (!itemId || !slot || OWNER[slotId] !== itemId) return false;
+/** End the pass. Beat one will not go out with a marked problem left. */
+async function send() {
+  if (state.busy || state.done) return;
+  const b = beat();
 
-  // Expert mode steers: the wrong slots are visibly dimmed and will
-  // not take the item, so the beat cannot go badly.
-  if (state.supports && !slot.correct) {
-    toast(meta.blockedLine, '', 2200);
-    return false;
+  if (b.supports) {
+    const left = problemsNow().filter((id) => !flagsNow().includes(id)).length;
+    if (left > 0) {
+      toast(left === 1 ? meta.blockedSendOne : meta.blockedSendMany.replace('{n}', String(left)), 'bad', 3200);
+      return;
+    }
   }
 
   const run = state.run;
   state.busy = true;
-  state.at[itemId] = slotId;
-  state.set[itemId] = true;
-  state.placements[state.beat][itemId] = slotId;
+  sendBtn.disabled = true;
 
-  await moveItem(itemId, slotId);
-  if (run !== state.run) return false;
+  await liftAway();
+  if (run !== state.run) return;
 
-  state.held = null;
-  showSlots();
-  paintGlare();
-  if (state.supports) state.notes.push({ item: ITEM[itemId], slot });
-  toast(meta.movedLine.replace('{item}', ITEM[itemId].name).replace('{slot}', slot.label), '', 2400);
+  toast(b.sentToast, b.supports ? 'good' : '', 3400);
+  bridge.progress(state.beat / beats.length, { flagged: [...flagsNow()] });
 
-  const done = items.filter((i) => state.set[i.id]).length;
-  stats.set('placed', done);
-  render();
-  state.busy = false;
+  if (state.beat >= beats.length) {
+    finish();
+    return;
+  }
 
-  bridge.progress((state.beatIndex + done / items.length) / beats.length, {
-    beat: state.beat, placed: done,
-  });
-
-  if (done === items.length) await closeBeat();
-  return true;
-}
-
-/** Five placed: hand over to the next beat, or to the comparison. */
-async function closeBeat() {
-  const run = state.run;
-  state.busy = true;
-  hintEl.textContent = meta.doneHint;
-  await wait(1500);
+  state.beat += 1;
+  await setupBeat();
   if (run !== state.run) return;
   state.busy = false;
+  sendBtn.disabled = false;
+}
 
-  if (state.beatIndex + 1 < beats.length) startBeat(state.beatIndex + 1);
-  else finish();
+async function restart() {
+  document.querySelector('.scrim')?.remove();
+  state.run += 1;
+  Object.assign(state, {
+    beat: 1,
+    flags: { 1: [], 2: [], 3: [] },
+    busy: false,
+    done: false,
+  });
+  board.style.visibility = '';
+  sendBtn.style.visibility = '';
+  hintEl.style.visibility = '';
+  sendBtn.disabled = false;
+  bridge.restart();
+  await setupBeat(true);
 }
 
 /* ============================================================
    Beats
    ============================================================ */
-function startBeat(index) {
-  const beat = beats[index];
-  state.beatIndex = index;
-  state.beat = beat.id;
-  state.supports = beat.supports;
-  state.placements[beat.id] = {};
-  state.set = {};
-  state.held = null;
-  state.notes = [];
+async function setupBeat(instant = false) {
+  const run = state.run;
+  const b = beat();
+  state.docId = b.doc;
+  state.supports = b.supports;
 
-  const mess = messes[MESS_FOR[index]];
-  for (const it of items) {
-    state.at[it.id] = mess[it.id];
-    setItem(it.id, mess[it.id]);
+  for (const id of regionOrder) {
+    const reg = regions[id];
+    reg.tab.visible = false;
+    reg.tab.scale.setScalar(0.01);
   }
-  paintGlare();
-  showSlots();
 
-  eyebrowEl.textContent = beat.eyebrow;
-  stats.set('beat', index + 1);
-  stats.set('placed', 0);
-  hintEl.textContent = meta.takeHint;
-  render();
-  if (index > 0) toast(beat.arrive, '', 3600);
+  applyPage();
+  applyVisuals();
+
+  eyebrowEl.textContent = b.eyebrow;
+  titleEl.textContent = b.title;
+  stats.set('beat', b.n);
+  stats.set('flagged', flagsNow().length);
+  renderBoard();
+  setHint();
+
+  if (!instant) {
+    await dropIn();
+    if (run !== state.run) return;
+  } else {
+    pageGroup.position.y = DESK_Y + 0.12 + PAGE_H / 2;
+    pageGroup.rotation.set(PAGE_TILT, 0, 0);
+    pageGroup.scale.setScalar(1);
+  }
 }
 
-function finish() {
-  state.over = true;
-  state.held = null;
-  showSlots();
-  hintEl.textContent = meta.doneHint;
-  render();
+/** Put the current document's printed face on the standing page. */
+function applyPage() {
+  const d = doc();
+  if (!pageTex.has(d.id)) pageTex.set(d.id, docTexture(d));
+  pagePlane.material.map = pageTex.get(d.id);
+  pagePlane.material.needsUpdate = true;
+}
 
-  const expert = state.placements.expert || {};
-  const mine = state.placements.again || {};
-  const matched = items.filter((i) => expert[i.id] === mine[i.id]).length;
-  const r = results.find((x) => matched >= x.min) ?? results[results.length - 1];
+/** Switch the reviewer's kit on or off for this beat. */
+function applyVisuals() {
+  const d = doc();
+  for (const id of regionOrder) {
+    const reg = regions[id];
+    const spec = d.regions[id];
+    const show = state.supports && spec.problem;
+
+    reg.fill.visible = show;
+    reg.outline.visible = show;
+    reg.fill.material.opacity = show ? 0.13 : 0;
+
+    for (const child of reg.tagHost.children) {
+      child.material?.map?.dispose?.();
+      child.material?.dispose?.();
+    }
+    reg.tagHost.clear();
+    reg.tagHost.visible = show;
+
+    if (!show) continue;
+
+    const sprite = tagSprite(spec.tag);
+    sprite.position.set(PAGE_W / 2 + 0.22 + sprite.scale.x / 2, 0, 0.09);
+    const link = flatPlane(0.22, 0.03, AMBER, 0.9, 7);
+    link.position.set(PAGE_W / 2 + 0.11, 0, 0.06);
+    reg.tagHost.add(sprite, link);
+  }
+}
+
+function renderBoard() {
+  const b = beat();
+  if (!b.supports) {
+    board.replaceChildren(el('p.banner', {}, b.banner));
+    return;
+  }
+  const d = doc();
+  const lines = regionOrder
+    .filter((id) => flagsNow().includes(id))
+    .map((id) => el('div.line', { html: `<b>${d.regions[id].label}</b> — ${d.regions[id].note}` }));
+  board.replaceChildren(el('div.note', {}, [
+    el('div.eyebrow', {}, meta.noteTitle),
+    el('div.log', {}, lines.length ? lines : [el('div.line.wait', {}, meta.noteWaiting)]),
+  ]));
+}
+
+function setHint() {
+  const b = beat();
+  const ready = b.supports && problemsNow().every((id) => flagsNow().includes(id));
+  hintEl.textContent = ready ? b.readyHint : b.hint;
+}
+
+/* ============================================================
+   The ending — beat three against beat one, on the same page
+   ============================================================ */
+function finish() {
+  state.done = true;
+  state.busy = false;
+  const firstDoc = docs[beats[0].doc];
+  const targets = state.problems[beats[0].doc];
+  const final = state.flags[beats.length];
+
+  const caught = targets.filter((id) => final.includes(id));
+  const falseFlags = final.filter((id) => !firstDoc.regions[id].problem);
+  const secondCaught = state.problems[beats[1].doc].filter((id) => state.flags[2].includes(id));
+
+  const fraction = caught.length / targets.length;
+  const passed = caught.length >= 2;
+  const r = results.find((x) => fraction >= x.min) ?? results[results.length - 1];
 
   bridge.complete({
-    passed: matched >= 3,
-    score: matched / items.length,
-    detail: { matched, expert, unaided: mine },
+    passed,
+    score: fraction,
+    detail: {
+      caught: [...caught],
+      missed: targets.filter((id) => !final.includes(id)),
+      falseFlags: [...falseFlags],
+      secondDocCaught: [...secondCaught],
+    },
   });
 
-  const points = [ending.lead.replace('{n}', String(matched))];
-  for (const it of items) {
-    const exp = SLOT[expert[it.id]] ?? SLOT[CORRECT[it.id]];
-    const got = SLOT[mine[it.id]];
-    const ok = exp && got && exp.id === got.id;
-    points.push(
-      `<b>${it.name}</b> <span class="${ok ? 'ok' : 'no'}">${ok ? ending.matchWord : ending.missWord}</span>`
-      + '<div class="cmp">'
-      + `<span class="who">${ending.expertLabel}: ${exp.label}</span>`
-      + `<span class="who">${ending.yoursLabel}: ${got ? got.label : exp.label}</span>`
-      + `<span class="tag">${exp.tag}</span>`
-      + '</div>',
-    );
-  }
-  points.push(ending.point);
+  const points = [
+    caught.length === 1 ? ending.leadOne : ending.leadMany.replace('{n}', String(caught.length)),
+    ...targets.map((id) => {
+      const spec = firstDoc.regions[id];
+      const line = final.includes(id) ? ending.caughtLine : ending.missedLine;
+      return line.replace('{part}', spec.label).replace('{reason}', spec.reason);
+    }),
+    falseFlags.length
+      ? ending.cleanSome.replace('{list}', nameList(falseFlags, firstDoc))
+      : ending.cleanNone,
+    secondCaught.length
+      ? ending.secondDocSome.replace('{n}', String(secondCaught.length))
+      : ending.secondDocNone,
+    ending.lesson,
+  ];
+
+  // The modal carries the ending; the note panel underneath would
+  // just be an empty white box behind it.
+  board.replaceChildren();
+  board.style.visibility = 'hidden';
+  sendBtn.style.visibility = 'hidden';
+  hintEl.style.visibility = 'hidden';
 
   showResult({
-    passed: matched >= 3,
+    passed,
     title: r.title,
     summary: r.summary,
     points,
     actions: [
-      { label: ending.close, kind: 'ghost' },
-      { label: ending.again, kind: 'primary', onClick: restart },
+      { label: meta.closeLabel, kind: 'ghost' },
+      { label: meta.againLabel, kind: 'primary', onClick: restart },
     ],
   });
 }
 
-function restart() {
-  document.querySelector('.scrim')?.remove();
-  state.run += 1;
-  state.busy = false;
-  state.over = false;
-  state.placements = {};
-  startBeat(0);
-  bridge.restart();
+function nameList(ids, d) {
+  const names = ids.map((id) => `<b>${d.regions[id].label}</b>`);
+  if (names.length === 1) return names[0];
+  return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
 }
 
 /* ============================================================
-   Scene reactions
+   Animation
    ============================================================ */
-/** Drop an item straight into a slot, no animation. */
-function setItem(itemId, slotId) {
-  const L = SLOT_LAYOUT[slotId];
-  const g = rig[itemId].group;
-  g.position.set(...L.pos);
-  g.rotation.y = L.aim ?? 0;
-  rig[itemId].fit?.(g.position.y);
-}
-
-/** Carry an item across to a slot, in a small arc where that suits. */
-function moveItem(itemId, slotId) {
-  const L = SLOT_LAYOUT[slotId];
-  const r = rig[itemId];
-  const g = r.group;
-  const from = g.position.clone();
-  const to = new THREE.Vector3(...L.pos);
-  const fromAim = g.rotation.y;
-  const toAim = L.aim ?? 0;
-  const lift = L.bump ? 0.3 : 0;
-
+/** A flag tab pops out of the page edge, or shrinks back into it. */
+function popTab(tab, on) {
+  if (on) tab.visible = true;
   return tween({
-    ms: 520, easing: ease.inOutCubic,
+    ms: on ? 260 : 180,
+    easing: on ? ease.outBack : ease.outCubic,
+    onUpdate: (_, e) => tab.scale.setScalar(on ? 0.01 + 0.99 * e : Math.max(0.01, 1 - e)),
+    onDone: () => { if (!on) tab.visible = false; },
+  });
+}
+
+/** The reviewed page leaves the holder and goes out. */
+async function liftAway() {
+  const y0 = pageGroup.position.y;
+  await tween({
+    ms: 560, easing: ease.inOutCubic,
     onUpdate: (_, e) => {
-      g.position.lerpVectors(from, to, e);
-      g.position.y += Math.sin(Math.PI * e) * lift;
-      g.rotation.y = fromAim + (toAim - fromAim) * e;
-      if (!lift) r.fit?.(g.position.y);
-    },
-    onDone: () => {
-      g.position.copy(to);
-      g.rotation.y = toAim;
-      r.fit?.(to.y);
+      pageGroup.position.y = y0 + 3.6 * e;
+      pageGroup.rotation.z = 0.26 * e;
+      pageGroup.rotation.x = PAGE_TILT - 0.3 * e;
+      pageGroup.scale.setScalar(1 - 0.22 * e);
     },
   });
 }
 
-/** Only the held item's slots are on, and only beat one marks one up. */
-function showSlots() {
-  // The held item stops taking clicks, so the pad of the slot it is
-  // already sitting in stays reachable — leaving something where it is
-  // has to be a choice the learner can make.
-  for (const it of items) stage.setPickEnabled(rig[it.id].group, state.held !== it.id);
-
-  for (const [id, n] of Object.entries(slotNodes)) {
-    const on = !!state.held && OWNER[id] === state.held;
-    n.group.visible = on;
-    n.marker.scale.setScalar(1);
-    if (!on) { n.tag.visible = false; continue; }
-
-    const correct = SLOT[id].correct && state.supports;
-    n.tag.visible = !!correct;
-    n.skin.color.setHex(correct ? MINT : 0xffffff);
-    n.skin.opacity = correct ? 0.85 : state.supports ? 0.16 : 0.5;
-  }
-}
-
-/** A lamp pointed at the screen washes it out — visibly. */
-function paintGlare() {
-  const glaring = state.at.lamp === 'lamp-glare';
-  const m = rig.monitor.screen.material;
-  m.emissive.setHex(glaring ? AMBER : 0x16202e);
-  m.emissiveIntensity = glaring ? 0.85 : 0.25;
+/** The next page drops into the holder. */
+async function dropIn() {
+  const y1 = DESK_Y + 0.12 + PAGE_H / 2;
+  pageGroup.position.y = y1 + 3.6;
+  pageGroup.rotation.set(PAGE_TILT - 0.3, 0, 0.26);
+  pageGroup.scale.setScalar(0.78);
+  await tween({
+    ms: 620, easing: ease.outCubic,
+    onUpdate: (_, e) => {
+      pageGroup.position.y = y1 + 3.6 * (1 - e);
+      pageGroup.rotation.z = 0.26 * (1 - e);
+      pageGroup.rotation.x = PAGE_TILT - 0.3 * (1 - e);
+      pageGroup.scale.setScalar(0.78 + 0.22 * e);
+    },
+  });
+  pageGroup.position.y = y1;
+  pageGroup.rotation.set(PAGE_TILT, 0, 0);
+  pageGroup.scale.setScalar(1);
+  await wait(60);
 }
 
 /* ============================================================
-   The board along the bottom
+   Drawing the document
    ============================================================ */
-function render() {
-  const beat = beats[state.beatIndex];
+/* Declarations, not consts: the first page is drawn during module
+   start-up, before this section has been evaluated. */
+function px(r) {
+  return { x: r.x * CANVAS_W, y: r.y * CANVAS_H, w: r.w * CANVAS_W, h: r.h * CANVAS_H };
+}
+function font(weight, size) {
+  return `${weight} ${size}px Urbanist, Helvetica, Arial, sans-serif`;
+}
+function monoFont(weight, size) {
+  return `${weight} ${size}px "JetBrains Mono", Consolas, ui-monospace, monospace`;
+}
 
-  const chips = items.map((it) => {
-    const held = state.held === it.id;
-    const done = !!state.set[it.id];
-    const where = SLOT[state.at[it.id]];
-    return el('button.chip' + (held ? '.held' : done ? '.done' : ''), {
-      type: 'button',
-      disabled: state.busy || state.over || null,
-      onClick: () => take(it.id),
-    }, [
-      el('span', {}, it.name),
-      el('span.sub', {}, (where ? where.label : '') + (done ? ' · ' + meta.placedTag : '')),
-    ]);
+function docTexture(d) {
+  return canvasTexture(CANVAS_W, CANVAS_H, (c) => {
+    c.fillStyle = PAPER;
+    c.fillRect(0, 0, CANVAS_W, CANVAS_H);
+    c.fillStyle = '#2757E2';
+    c.fillRect(0, 0, CANVAS_W, 16);
+    c.strokeStyle = 'rgba(16,19,26,0.10)';
+    c.lineWidth = 2;
+    c.strokeRect(1, 1, CANVAS_W - 2, CANVAS_H - 2);
+
+    drawHeader(c, px(LAYOUT.header), d);
+    drawClient(c, px(LAYOUT.client), d);
+    drawPara(c, px(LAYOUT.para), d);
+    drawChart(c, px(LAYOUT.chart), d);
+    drawTable(c, px(LAYOUT.table), d);
+    drawFooter(c, px(LAYOUT.footer), d);
+  });
+}
+
+function wrapLines(c, text, maxW) {
+  const words = String(text).split(/\s+/);
+  const lines = [];
+  let line = '';
+  for (const w of words) {
+    const next = line ? `${line} ${w}` : w;
+    if (c.measureText(next).width > maxW && line) { lines.push(line); line = w; }
+    else line = next;
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+/** Shrink until it fits one line, then give up and wrap. */
+function fitLine(c, text, maxW, weight, start, min) {
+  let size = start;
+  c.font = font(weight, size);
+  while (c.measureText(text).width > maxW && size > min) {
+    size -= 2;
+    c.font = font(weight, size);
+  }
+  return wrapLines(c, text, maxW);
+}
+
+function hairline(c, x, y, w, colour = RULE, h = 2) {
+  c.fillStyle = colour;
+  c.fillRect(x, y, w, h);
+}
+
+function drawHeader(c, r, d) {
+  c.textAlign = 'left';
+  c.textBaseline = 'alphabetic';
+
+  c.font = font(800, 21);
+  c.fillStyle = '#2757E2';
+  c.fillText(d.kicker.toUpperCase(), r.x, r.y + 28);
+
+  const lines = fitLine(c, d.title, r.w, 800, 52, 34);
+  c.fillStyle = INK;
+  lines.slice(0, 2).forEach((line, i) => c.fillText(line, r.x, r.y + 100 + i * 58));
+
+  c.font = font(600, 25);
+  c.fillStyle = INK_DIM;
+  c.fillText(d.subtitle, r.x, r.y + 172);
+
+  hairline(c, r.x, r.y + r.h - 12, r.w, '#2757E2', 3);
+}
+
+function drawClient(c, r, d) {
+  c.textAlign = 'left';
+  c.font = font(700, 20);
+  c.fillStyle = INK_DIM;
+  c.fillText(d.clientLabel.toUpperCase(), r.x, r.y + 24);
+
+  c.font = font(800, 34);
+  c.fillStyle = INK;
+  c.fillText(d.clientName, r.x, r.y + 74);
+
+  c.font = font(500, 24);
+  c.fillStyle = INK_DIM;
+  c.fillText(d.clientAddress, r.x, r.y + 114);
+}
+
+function drawPara(c, r, d) {
+  c.textAlign = 'left';
+  c.font = font(500, 27);
+  c.fillStyle = '#242938';
+  wrapLines(c, d.para, r.w).slice(0, 5).forEach((line, i) => c.fillText(line, r.x, r.y + 36 + i * 44));
+}
+
+function drawChart(c, r, d) {
+  const ch = d.chart;
+  c.textAlign = 'left';
+  c.font = font(800, 25);
+  c.fillStyle = INK;
+  c.fillText(ch.caption, r.x, r.y + 26);
+
+  const left = r.x + (ch.axis ? 118 : 24);
+  const topY = r.y + 54;
+  const plotW = r.x + r.w - left;
+  const plotH = r.h - 54 - 46;
+  const baseY = topY + plotH;
+
+  if (ch.ticks) {
+    c.font = font(600, 20);
+    c.textAlign = 'right';
+    for (const tick of ch.ticks) {
+      const y = baseY - (tick / ch.max) * plotH;
+      hairline(c, left, y, plotW, 'rgba(16,19,26,0.08)', 2);
+      c.fillStyle = INK_DIM;
+      c.fillText(String(tick), left - 14, y + 7);
+    }
+  }
+  hairline(c, left, baseY, plotW, 'rgba(16,19,26,0.28)', 3);
+
+  const n = ch.bars.length;
+  const slot = plotW / n;
+  const barW = slot * 0.46;
+  ch.bars.forEach((bar, i) => {
+    const h = Math.max(4, (bar.value / ch.max) * plotH);
+    const x = left + slot * i + (slot - barW) / 2;
+    c.fillStyle = '#2757E2';
+    c.fillRect(x, baseY - h, barW, h);
+
+    c.textAlign = 'center';
+    if (ch.axis) {
+      c.font = font(700, 21);
+      c.fillStyle = '#2757E2';
+      c.fillText(`${bar.value}${ch.suffix || ''}`, x + barW / 2, baseY - h - 12);
+    }
+    c.font = font(600, 21);
+    c.fillStyle = INK_DIM;
+    c.fillText(bar.label, x + barW / 2, baseY + 32);
   });
 
-  const parts = [
-    el('div.eyebrow', {}, beat.eyebrow),
-    el('p.banner', {}, beat.banner),
-    el('div.tray', {}, chips),
-  ];
-
-  if (beat.supports) {
-    const lines = state.notes.length
-      ? state.notes.map((n) => el('div.line', { html: `<b>${n.item.name} — ${n.slot.label}.</b> ${n.slot.note}` }))
-      : [el('div.line.wait', {}, meta.assessorWaiting)];
-    parts.push(el('div.assessor', {}, [
-      el('div.eyebrow', {}, meta.assessorLabel),
-      el('div.log', {}, lines),
-    ]));
-  }
-
-  boardEl.replaceChildren(...parts);
-
-  if (!state.over) {
-    hintEl.textContent = state.held
-      ? (state.supports ? meta.placeHint : meta.heldHint.replace('{item}', ITEM[state.held].name))
-      : items.every((i) => state.set[i.id]) ? meta.doneHint : meta.takeHint;
+  if (ch.axis) {
+    c.save();
+    c.translate(r.x + 36, baseY - plotH / 2);
+    c.rotate(-Math.PI / 2);
+    c.font = font(700, 21);
+    c.fillStyle = INK_DIM;
+    c.textAlign = 'center';
+    c.fillText(ch.axis, 0, 0);
+    c.restore();
   }
 }
 
-/* ---------------- Label sprite ---------------- */
-/** The floating reason tag: a white pill, wrapped to two lines. */
+function drawTable(c, r, d) {
+  const t = d.table;
+  c.textAlign = 'left';
+  c.font = font(800, 25);
+  c.fillStyle = INK;
+  c.fillText(t.caption, r.x, r.y + 26);
+
+  t.rows.forEach(([label, value], i) => {
+    const y = r.y + 78 + i * 52;
+    c.textAlign = 'left';
+    c.font = font(600, 25);
+    c.fillStyle = '#242938';
+    c.fillText(label, r.x, y);
+    c.textAlign = 'right';
+    c.font = monoFont(500, 25);
+    c.fillStyle = INK;
+    c.fillText(value, r.x + r.w, y);
+    hairline(c, r.x, y + 16, r.w, 'rgba(16,19,26,0.08)', 2);
+  });
+
+  const ruleY = r.y + 78 + t.rows.length * 52 - 20;
+  hairline(c, r.x, ruleY, r.w, 'rgba(16,19,26,0.35)', 3);
+
+  const totalY = ruleY + 48;
+  c.textAlign = 'left';
+  c.font = font(800, 26);
+  c.fillStyle = INK;
+  c.fillText(t.total[0], r.x, totalY);
+  c.textAlign = 'right';
+  c.font = monoFont(700, 26);
+  c.fillText(t.total[1], r.x + r.w, totalY);
+}
+
+function drawFooter(c, r, d) {
+  hairline(c, r.x, r.y, r.w, RULE, 2);
+  c.textAlign = 'left';
+  c.font = font(600, 21);
+  c.fillStyle = INK_DIM;
+  wrapLines(c, d.footer, r.w).slice(0, 2).forEach((line, i) => c.fillText(line, r.x, r.y + 36 + i * 30));
+}
+
+/** The floating reason tag beside a marked problem. */
 function tagSprite(text) {
-  const W = 760;
-  const H = 240;
+  const W = 1000, H = 300;
   const tex = canvasTexture(W, H, (c) => {
     c.clearRect(0, 0, W, H);
-    c.font = '700 44px Urbanist, Helvetica, Arial, sans-serif';
-
-    const words = text.split(' ');
-    const lines = [];
-    let line = '';
-    for (const word of words) {
-      const next = line ? line + ' ' + word : word;
-      if (c.measureText(next).width > W - 110 && line) { lines.push(line); line = word; }
-      else line = next;
-    }
-    if (line) lines.push(line);
-    const show = lines.slice(0, 2);
-
-    const widest = Math.max(...show.map((l) => c.measureText(l).width));
-    const boxW = Math.min(W - 8, widest + 80);
-    const boxH = show.length > 1 ? 150 : 100;
-    const x = (W - boxW) / 2;
-    const y = (H - boxH) / 2;
-
     c.fillStyle = '#ffffff';
     c.beginPath();
-    c.roundRect(x, y, boxW, boxH, 44);
+    c.roundRect(8, 24, W - 16, H - 48, 34);
     c.fill();
-    c.fillStyle = MINT_INK;
-    c.fillRect(x + 14, y + 22, 7, boxH - 44);
+    c.strokeStyle = '#E0A32A';
+    c.lineWidth = 6;
+    c.beginPath();
+    c.roundRect(11, 27, W - 22, H - 54, 32);
+    c.stroke();
+    c.fillStyle = '#E0A32A';
+    c.beginPath();
+    c.roundRect(8, 24, 18, H - 48, 9);
+    c.fill();
 
-    c.fillStyle = '#10131A';
-    c.textAlign = 'center';
-    c.textBaseline = 'middle';
-    show.forEach((l, i) => {
-      c.fillText(l, W / 2 + 6, H / 2 + (i - (show.length - 1) / 2) * 54);
-    });
+    c.font = font(700, 44);
+    c.fillStyle = AMBER_INK;
+    c.textAlign = 'left';
+    const lines = wrapLines(c, text, W - 130).slice(0, 3);
+    const y0 = H / 2 - ((lines.length - 1) * 52) / 2 + 14;
+    lines.forEach((line, i) => c.fillText(line, 58, y0 + i * 52));
   });
-
-  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, depthTest: false }));
-  s.renderOrder = 20;
-  s.scale.set(2.5, 0.79, 1);
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
+  const h = 0.62;
+  s.scale.set(h * (W / H), h, 1);
   return s;
 }

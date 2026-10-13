@@ -11,7 +11,8 @@ import { THREE, createStage, addLightRig, box, tween, ease, wait } from '../../s
 import { el, hideLoading } from '../../shared/ui.js';
 import { createBridge } from '../../shared/embed.js';
 import {
-  meta, people, avatarColours, memberStatus, startLink, decisions, linkStates,
+  meta, people, avatarColours, memberStatus, pairsLabel, wantsLabel,
+  startLink, decisions, linkStates,
   endings, recapTitle, noRipples, point, again, close,
 } from './content.js';
 
@@ -71,6 +72,7 @@ document.getElementById('ws').textContent = meta.workspace;
 document.getElementById('grpChannels').textContent = meta.channelsLabel;
 document.getElementById('chan').textContent = meta.channel;
 document.getElementById('grpPeople').textContent = meta.peopleLabel;
+document.getElementById('grpPairs').textContent = pairsLabel;
 document.getElementById('chatHead').replaceChildren(
   el('b', {}, meta.channel),
   el('span', {}, meta.channelNote),
@@ -88,6 +90,7 @@ new ResizeObserver(fitWork).observe(titlePanel);
 fitWork();
 
 const membersEl = document.getElementById('members');
+const pairsEl = document.getElementById('pairs');
 const meEl = document.getElementById('me');
 const log = document.getElementById('log');
 const compose = document.getElementById('compose');
@@ -111,6 +114,9 @@ for (let i = 0; i < people.length; i++) {
     links[key] = { value: startLink, a: people[i].id, b: people[j].id };
   }
 }
+
+/** Hoisted: the sidebar renders during start-up, above the helpers. */
+function nameOf(id) { return people.find((p) => p.id === id)?.name ?? id; }
 
 /* ---------------- State ---------------- */
 const state = { step: 0, pending: [], busy: false, over: false, run: 0 };
@@ -233,17 +239,41 @@ function trim() {
 /* ---------------- Sidebar ---------------- */
 function renderMembers() {
   membersEl.replaceChildren(...people.map((person) => {
+    // Their worst relationship, and who it is with — a status that does
+    // not name the other person says nothing worth reading.
     const mine = Object.values(links).filter((l) => l.a === person.id || l.b === person.id);
-    const worst = Math.min(...mine.map((l) => l.value));
-    const status = memberStatus.find((s) => worst <= s.atMost) ?? memberStatus[memberStatus.length - 1];
+    const worst = mine.reduce((a, b) => (b.value < a.value ? b : a));
+    const other = nameOf(worst.a === person.id ? worst.b : worst.a);
+    const status = memberStatus.find((s) => worst.value <= s.atMost) ?? memberStatus[memberStatus.length - 1];
     return el(`div.member${status.tone ? '.' + status.tone : ''}`, {}, [
       avatar(person.id, person.name),
       el('div', {}, [
         el('div.nm', {}, person.name),
-        el('div.st', {}, status.text),
+        el('div.st', {}, status.text.replace('{name}', other)),
+        el('div.wants', {}, person.wants),
       ]),
     ]);
   }));
+
+  renderPairs();
+}
+
+/** Every relationship between two of them, worst first: the thing the
+    learner changes without ever talking to either of them. */
+function renderPairs() {
+  const rows = Object.values(links)
+    .slice()
+    .sort((a, b) => a.value - b.value)
+    .map((link) => {
+      const s = stateOf(link.value);
+      const tone = s.id === 'broken' ? 'bad' : s.id === 'strained' ? 'warn' : s.id === 'good' ? 'good' : '';
+      return el(`div.pair${tone ? '.' + tone : ''}`, {}, [
+        el('span.dot', {}),
+        el('span.who', {}, `${nameOf(link.a)} & ${nameOf(link.b)}`),
+        el('span.how', {}, s.label),
+      ]);
+    });
+  pairsEl.replaceChildren(...rows);
 }
 
 /* ---------------- Compose box ---------------- */
@@ -315,7 +345,6 @@ function restart() {
 
 /* ---------------- Helpers ---------------- */
 const clamp = (v) => Math.max(-1, Math.min(1, v));
-const nameOf = (id) => people.find((p) => p.id === id)?.name ?? id;
 const valueMap = () => Object.fromEntries(Object.entries(links).map(([k, l]) => [k, Number(l.value.toFixed(2))]));
 
 function stateOf(value) {

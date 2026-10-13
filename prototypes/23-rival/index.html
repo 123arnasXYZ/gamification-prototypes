@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Give Learners a Rival — The Shared Backlog</title>
+<!-- ?v= bumps the cache when the shared styling changes -->
+<link rel="stylesheet" href="../../shared/style.css?v=2">
+<style>
+  /* The table panel is tall, so messages sit above it rather than on it */
+  .toasts { bottom: 236px; }
+
+  /* The rival's warm orange, used only for her side of the table */
+  :root { --rival: #E07A2A; }
+
+  .turn .line { font-size: 14px; color: var(--ink); margin: 0 0 10px; }
+  .turn .line b { color: var(--blue); }
+
+  /* What Mara said, in her colour, so her side of the table and her
+     voice read as the same thing. */
+  .said {
+    border-left: 3px solid var(--rival);
+    background: var(--grey);
+    border-radius: 0 var(--r-sm) var(--r-sm) 0;
+    padding: 9px 12px;
+    margin: 0;
+  }
+  .said .eyebrow { color: var(--rival); margin-bottom: 3px; }
+  .said p { font-size: 13.5px; color: var(--ink); line-height: 1.5; }
+  .said.quiet { border-left-color: var(--line-2); }
+  .said.quiet p { color: var(--ink-dim); font-style: italic; }
+
+  /* Her two counters sit in the stat row, so they get her colour */
+  .stat[data-id="maraHours"] .v,
+  .stat[data-id="maraWorth"] .v { color: var(--rival); }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<div class="stage" id="stage"></div>
+
+<div class="ui-layer">
+  <div class="topbar" style="align-items:flex-start">
+    <div class="panel" style="max-width:min(420px,46vw)">
+      <div class="eyebrow" id="eyebrow"></div>
+      <div class="title" id="title"></div>
+    </div>
+    <div class="spacer"></div>
+    <div style="display:flex;flex-direction:column;gap:9px;align-items:flex-end">
+      <div class="stats" id="stats"></div>
+      <button class="btn ghost clickable" id="restart" type="button">Restart</button>
+    </div>
+  </div>
+
+  <div style="flex:1"></div>
+
+  <div class="panel clickable" id="bottom" style="width:min(720px,96vw);margin:0 auto"></div>
+</div>
+
+<div class="loading" id="loading">Laying out the day’s backlog…</div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>

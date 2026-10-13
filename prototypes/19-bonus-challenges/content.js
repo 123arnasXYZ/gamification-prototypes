@@ -1,179 +1,340 @@
 /* ============================================================
    Content for "Add bonus challenges".
 
-   The base activity is deliberately plain: six fire-safety
-   questions, three options each. Nothing about it is clever.
+   The base activity is a planning puzzle, not a quiz: you have
+   tomorrow, three meetings you cannot move, and seven jobs that
+   add up to exactly the time you have left. Fit them in. That is
+   the whole activity, and on its own it takes a minute.
 
-   The five achievements below are what makes it worth running
-   twice. Only two of them are about answering well — the rest
-   reward restraint, curiosity, and recovering from a mistake, so
-   the same six questions give five different things to chase.
+   The six challenges below are what makes it worth running more
+   than once. They run at the same time, they are judged against
+   the plan you build rather than against answers, and some of
+   them cannot both be true — "everything in the day" takes the
+   last free half hour that "a proper break" needs. So one run
+   cannot catch all six, and the second run is a different game
+   played on the same board.
+
+   EVERY learner-facing string and every tunable number is here.
    ============================================================ */
 
 export const meta = {
-  eyebrow: 'Annual refresher — 6 questions',
-  title: 'Fire safety knowledge check',
-  stepLabel: 'Question {n} of {total}',
-  instructions: 'Pick an answer, then confirm it.',
-  readyToConfirm: 'Happy with that one? Confirm it.',
-  chasing: 'Chasing',
-  hintLabel: 'Show me a clue',
-  hintUsed: 'Clue shown',
-  confirmLabel: 'Confirm answer',
-  whyLabel: 'Why?',
-  nextLabel: 'Next question',
-  finishLabel: 'See how you did',
-  correct: 'Correct.',
-  wrong: 'Not that one.',
-  hiddenMark: '?',
-  hiddenLocked: 'Hidden for now',
-  earnedMark: 'Earned',
+  eyebrow: 'Tomorrow — 08:00 to 18:00',
+  title: 'Build tomorrow out of what is on your list',
+  trayLabel: 'On your list',
+  dayLabel: 'Tomorrow',
+  chalLabel: 'Challenges',
+  chalSub: 'All six are live at once',
 };
 
-export const questions = [
-  {
-    id: 'alarm',
-    prompt: 'The fire alarm sounds while you are mid-task at your desk. What do you do first?',
-    options: [
-      'Leave by the nearest marked exit',
-      'Finish the sentence you are typing, then go',
-      'Wait until you see other people moving',
-    ],
-    answer: 0,
-    hint: 'Two of these options involve waiting for something.',
-    why: 'The alarm is the instruction — there is nothing else to wait for. Every second spent deciding is a second the corridor gets busier.',
-  },
-  {
-    id: 'wedge',
-    prompt: 'You find a fire door held open with a wooden wedge. What do you do?',
-    options: [
-      'Prop it wider so trolleys can get through',
-      'Remove the wedge and let it close',
-      'Leave it — someone opened it for a reason',
-    ],
-    answer: 1,
-    hint: 'Think about the one job that door has when it is shut.',
-    why: 'A fire door only works closed. Held open, it is a gap in the wall that smoke travels through — and smoke reaches people long before flames do.',
-  },
-  {
-    id: 'assembly',
-    prompt: 'What is the assembly point actually for?',
-    options: [
-      'Somewhere sheltered to wait out the weather',
-      'A spot to wait for a colleague to say it is clear',
-      'Where a roll call confirms everyone is out',
-    ],
-    answer: 2,
-    hint: 'Someone at the assembly point is holding a list.',
-    why: 'The assembly point exists so somebody can count. If you drift off to your car, you are recorded as still inside and someone goes back in to look for you.',
-  },
-  {
-    id: 'bin',
-    prompt: 'A waste bin catches light. You have had no extinguisher training. What now?',
-    options: [
-      'Grab the nearest extinguisher and put it out',
-      'Raise the alarm and leave with everyone else',
-      'Open a window to let the smoke out',
-    ],
-    answer: 1,
-    hint: 'One of these is only an option if you have been trained for it.',
-    why: 'Untrained use of an extinguisher buys seconds and costs minutes. Raising the alarm protects the whole building; tackling the fire protects one bin.',
-  },
-  {
-    id: 'boxes',
-    prompt: 'Cardboard boxes have been stacked in the corridor by the stairs. Why does that matter?',
-    options: [
-      'It makes the corridor look untidy',
-      'It is fuel, and it narrows your way out',
-      'It only counts if it blocks the door itself',
-    ],
-    answer: 1,
-    hint: 'A corridor has two jobs here, and the boxes affect both.',
-    why: 'Storage in an escape route does two things at once: it adds something to burn, and it slows down the people trying to get past it.',
-  },
-  {
-    id: 'report',
-    prompt: 'An extinguisher on your floor has clearly been discharged. What do you do?',
-    options: [
-      'Tell the fire warden or facilities today',
-      'Nothing — extinguishers get checked annually',
-      'Stick a note on it and carry on',
-    ],
-    answer: 0,
-    hint: 'The next person to reach for it will not read your note first.',
-    why: 'An empty extinguisher is worse than no extinguisher: someone will trust it in an emergency. Reporting it the same day is the whole job.',
-  },
-];
+/* ------------------------------------------------------------------
+   The day. 20 slots of 30 minutes, 08:00 to 18:00. Change `slots`
+   or `slotMinutes` and the grid, the labels and every challenge
+   below follow it.
+   ------------------------------------------------------------------ */
+export const day = {
+  startHour: 8,
+  slots: 20,
+  slotMinutes: 30,
+};
 
-/* How many right answers counts as a pass on the plain activity.
-   The achievements are deliberately separate from this. */
-export const passMark = 4;
+/* The three things already in the diary. `from` is a slot index:
+   slot 0 is 08:00. These cannot be moved, which is the whole
+   reason the puzzle is tight. */
+export const meetings = [
+  { id: 'team', name: 'Team meeting', from: 5, slots: 2 },
+  { id: 'hartley', name: 'Hartley call', from: 12, slots: 2, client: true },
+  { id: 'priya', name: '1:1 with Priya', from: 15, slots: 1 },
+];
 
 /* ------------------------------------------------------------------
-   The five bonus challenges.
+   The seven jobs. Together they are 15 half-hours, and the day has
+   exactly 15 half-hours that are not a meeting — so a plan that
+   holds everything holds nothing else.
 
-   `test(state)` reads the live run. `atEnd` ones cannot be settled
-   until the last question is confirmed ("finish the rest" needs a
-   finish). `hidden` ones stay off the board until the learner is
-   within `revealWithin` of the target, then appear as a nudge —
-   that distance is a tuning knob, so it lives here.
+   must     — the day does not run without it
+   deep     — real concentration, worth protecting
+   waiting  — somebody else is held up until it is done
    ------------------------------------------------------------------ */
-export const achievements = [
+export const tasks = [
   {
-    id: 'sharpshooter',
-    name: 'Sharpshooter',
-    locked: 'Four correct answers in a row',
-    earned: 'Four correct in a row — Sharpshooter.',
-    hidden: true,
-    need: 4,
-    revealWithin: 1,
-    nudge: 'One more correct answer to unlock Sharpshooter.',
-    progress: (s) => s.streak,
-    test: (s) => s.streak >= 4,
+    id: 'proposal',
+    name: 'Finish the Hartley proposal',
+    short: 'Hartley proposal',
+    slots: 4,
+    must: true, deep: true,
+    note: 'Two hours. They are on the call at 14:00 expecting to talk about it.',
   },
   {
-    id: 'comeback',
-    name: 'Comeback Kid',
-    locked: 'Get one wrong, then finish the rest clean',
-    earned: 'One slip and nothing after it — Comeback Kid.',
-    atEnd: true,
-    test: (s) => s.wrongAt.length === 1 && s.wrongAt[0] < s.answered - 1,
+    id: 'spec',
+    name: 'Write the handover spec',
+    short: 'Handover spec',
+    slots: 3,
+    deep: true,
+    note: 'Ninety minutes of head-down writing. Nobody is chasing it yet.',
   },
   {
-    id: 'nohelp',
-    name: 'No Help Needed',
-    locked: 'Finish without asking for a single clue',
-    earned: 'Six questions, no clues — No Help Needed.',
-    atEnd: true,
-    test: (s) => s.flags.every((f) => !f.hintUsed),
+    id: 'review',
+    name: "Review Kara's draft",
+    short: "Kara's draft",
+    slots: 2,
+    must: true, waiting: true,
+    note: 'Kara cannot send it until you have been through it.',
   },
   {
-    id: 'curious',
-    name: 'Curious Mind',
-    locked: 'Read the "why?" on three questions',
-    earned: 'Three explanations read — Curious Mind.',
-    need: 3,
-    progress: (s) => s.flags.filter((f) => f.whyOpened).length,
-    test: (s) => s.flags.filter((f) => f.whyOpened).length >= 3,
+    id: 'numbers',
+    name: 'Pull the quarter numbers for Tom',
+    short: 'Quarter numbers',
+    slots: 2,
+    waiting: true,
+    note: 'Tom is building his board pack around them.',
   },
   {
-    id: 'second',
-    name: 'Second Thoughts',
-    locked: 'Change your mind before confirming',
-    earned: 'You changed your answer before locking it in — Second Thoughts.',
-    test: (s) => s.flags.some((f) => f.changedAnswer),
+    id: 'calls',
+    name: 'Return the three supplier calls',
+    short: 'Supplier calls',
+    slots: 2,
+    note: 'All three rang yesterday. None of them is urgent on its own.',
+  },
+  {
+    id: 'inbox',
+    name: 'Clear the inbox',
+    short: 'Inbox',
+    slots: 1,
+    note: 'Half an hour and it is done. It will not stay done.',
+  },
+  {
+    id: 'expenses',
+    name: 'Expenses, before the cut-off',
+    short: 'Expenses',
+    slots: 1,
+    must: true,
+    note: 'Half an hour, and the cut-off is tonight.',
   },
 ];
 
+/* ------------------------------------------------------------------
+   The plain activity: what makes a day you can actually run. This
+   is deliberately easy — it is the thing the challenges sit on top
+   of, not the thing you replay for.
+   ------------------------------------------------------------------ */
+export const baseline = {
+  /* The proposal has to be finished before the client call starts. */
+  proposalBy: 12,
+  missingMusts: (names) => `Still to place: ${names.join(', ')}.`,
+  proposalLate: 'The day runs — but the proposal is not finished before the Hartley call at 14:00.',
+  ready: 'The day runs. Six challenges are live — see how many this plan catches.',
+};
+
+/* ------------------------------------------------------------------
+   The six challenges.
+
+   Each is tested against the plan, live, while it is being built —
+   so the board shows you trading one for another as you move
+   things about.
+
+   test(p)     — true when the plan earns it
+   progress(p) — [done, needed] for the ones worth counting
+   hidden      — stays a "?" on the board until `revealAt` progress
+   clash       — the one it fights with, named in the ending
+   ------------------------------------------------------------------ */
+export const challenges = [
+  {
+    id: 'early',
+    name: 'Clear Head',
+    goal: 'Start the proposal before 10:00',
+    earned: 'The hardest job got your first, best hours.',
+    missed: 'The proposal started after 10:00, on second-best attention.',
+    test: (p) => p.placed('proposal') && p.start('proposal') < 5,
+  },
+  {
+    id: 'waiting',
+    name: 'Nobody Waiting',
+    goal: 'Finish both jobs other people need by 12:00',
+    earned: 'Kara and Tom both got what they needed before lunch.',
+    missed: 'Somebody spent the afternoon waiting on you.',
+    progress: (p) => [
+      (p.placed('review') && p.end('review') <= 8 ? 1 : 0) + (p.placed('numbers') && p.end('numbers') <= 8 ? 1 : 0),
+      2,
+    ],
+    test: (p) => p.placed('review') && p.end('review') <= 8 && p.placed('numbers') && p.end('numbers') <= 8,
+  },
+  {
+    id: 'break',
+    name: 'Proper Break',
+    goal: 'Leave half an hour free between 12:00 and 13:30',
+    earned: 'There was half an hour in the middle of the day that belonged to you.',
+    missed: 'You ate at the desk between two jobs.',
+    clash: 'Nothing Left Over',
+    test: (p) => [8, 9, 10, 11].some((s) => p.isFree(s)),
+  },
+  {
+    id: 'air',
+    name: 'Breathing Room',
+    goal: 'Keep the half hour before every meeting free',
+    earned: 'You walked into all three meetings without finishing something on the way.',
+    missed: 'At least one meeting started the second you put something else down.',
+    clash: 'Front Loaded',
+    hidden: true,
+    revealAt: 2,
+    nudge: 'One more clear half hour before a meeting unlocks Breathing Room.',
+    progress: (p) => [[4, 11, 14].filter((s) => p.isFree(s)).length, 3],
+    test: (p) => [4, 11, 14].every((s) => p.isFree(s)),
+  },
+  {
+    id: 'all',
+    name: 'Nothing Left Over',
+    goal: 'Get everything on the list into the day',
+    earned: 'Seven jobs, seven slots in the day, nothing carried over to Thursday.',
+    missed: 'Something on the list never got a time, so it moves to Thursday by default.',
+    clash: 'Proper Break',
+    hidden: true,
+    revealAt: 6,
+    nudge: 'One job left to place and Nothing Left Over is yours.',
+    progress: (p) => [p.placedCount, 7],
+    test: (p) => p.placedCount === 7,
+  },
+  {
+    id: 'front',
+    name: 'Front Loaded',
+    goal: 'Fill every working half hour before 12:00',
+    earned: 'Three solid hours were behind you before most people had started.',
+    missed: 'The morning had gaps in it.',
+    clash: 'Breathing Room',
+    progress: (p) => [[0, 1, 2, 3, 4, 7].filter((s) => !p.isFree(s)).length, 6],
+    test: (p) => [0, 1, 2, 3, 4, 7].every((s) => !p.isFree(s)),
+  },
+];
+
+/* ------------------------------------------------------------------
+   What the learner reads while building.
+   ------------------------------------------------------------------ */
+export const ui = {
+  pickPrompt: 'Click a job, then click where it starts.',
+  pickedPrompt: '{name} — {len}. Click a start time, or click it again to put it back.',
+  noRoom: 'It will not fit there — something is already in the way.',
+  pastEnd: 'That runs past 18:00.',
+  runLabel: 'Run the day',
+  clearLabel: 'Clear the day',
+  againLabel: 'Plan it again',
+  closeLabel: 'Close',
+  lockedMark: '?',
+  /* Challenges you have already caught stay caught: a new plan starts
+     with them marked, and the board keeps the running total. */
+  bankedBadge: 'EARNED BEFORE',
+  collected: (n, total) => `${n} of ${total} caught so far`,
+  lastLeft: (name) => `${name} is the last one on the board.`,
+  hiddenGoal: 'Hidden for now',
+  onTrack: 'On track',
+  running: 'Running the day…',
+  duration: (slots) => (slots === 1 ? '30 minutes' : slots % 2 ? `${slots / 2} hours` : `${slots / 2} hour${slots > 2 ? 's' : ''}`),
+};
+
+/* ------------------------------------------------------------------
+   The day playing out. Each beat fires as the clock passes its slot.
+   `when` reads the same plan the challenges do.
+   ------------------------------------------------------------------ */
+export const beats = [
+  {
+    at: (p) => p.end('proposal'),
+    when: (p) => p.placed('proposal') && p.end('proposal') <= 12,
+    text: 'The proposal goes over to Tom, finished, with time to spare.',
+    tone: 'good',
+  },
+  {
+    at: () => 12,
+    when: (p) => !p.placed('proposal') || p.end('proposal') > 12,
+    text: 'You take the Hartley call with the proposal still half-written.',
+    tone: 'bad',
+  },
+  {
+    at: () => 9,
+    when: (p) => [8, 9, 10, 11].some((s) => p.isFree(s)),
+    text: 'Half an hour with nothing booked in it. You leave the desk.',
+    tone: 'good',
+  },
+  {
+    at: () => 9,
+    when: (p) => ![8, 9, 10, 11].some((s) => p.isFree(s)),
+    text: 'Lunch happens at the desk, between two jobs.',
+    tone: '',
+  },
+  {
+    at: () => 19,
+    when: (p) => p.placedCount < 7,
+    text: 'Six o\'clock. What never got a slot moves to Thursday.',
+    tone: '',
+  },
+];
+
+/* ------------------------------------------------------------------
+   The ending.
+   ------------------------------------------------------------------ */
 export const result = {
-  title: 'Six questions, five things to chase',
-  summary: 'You scored {score} out of {total}.',
-  earnedLabel: 'Earned',
-  missedLabel: 'Missed',
-  earnedPoint: '<b>{name}</b> — earned.',
-  missedPoint: '<b>{name}</b> — still open: {locked}.',
-  nothingEarned: 'None of the five this time — every one of them is still there to go after.',
-  point: '<b>The questions never changed.</b> Same six, same three options, same right answers — and five different ways to win at them. One run cannot catch all five, because chasing a clean streak and chasing every explanation pull in different directions.',
-  again: 'Run it again, go after a different one',
-  close: 'Close',
+  titleAll: 'Six out of six — on one plan',
+  title: '{n} of the six, from one day',
+  titleNone: 'The day ran. None of the six.',
+  summary: 'Same three meetings, same seven jobs, same ten hours. The plan is the only thing that changed.',
+  onTime: '<b>The proposal was finished before the Hartley call.</b> That was the job the day was really for, and it got done.',
+  late: '<b>You took the Hartley call with the proposal half-written.</b> None of the six challenges covers that — the plain activity still has to work first.',
+  earnedPoint: '<b>{name}</b> — {earned}',
+  bankedPoint: '<b>{name}</b> — not on this plan, but you caught it on an earlier one. It stays caught.',
+  collected: '<b>{n} of the six, across {runs} plans.</b> {left}',
+  leftSome: '{k} still waiting for a plan that catches {them}.',
+  leftNone: 'There is nothing left on the board to chase.',
+  missedPoint: '<b>{name}</b> — {missed}',
+  clashPoint: '<b>You cannot have all six.</b> The last free half hour cannot be both a break and the seventh job, and the gap before a meeting cannot be both empty and part of a full morning. Choosing which challenge to chase <i>is</i> the second playthrough.',
+  point: '<b>Nothing here was added to the activity.</b> The day, the meetings and the list never changed — six optional goals were laid over the top of them, and between them they ask for accuracy, kindness to the people waiting, protecting your own attention and knowing when to leave something undone.',
+};
+
+/* ------------------------------------------------------------------
+   Looks.
+   ------------------------------------------------------------------ */
+export const palette = {
+  blue: '#2757e2',
+  mint: '#5fe0b0',
+  amber: '#e0a32a',
+  red: '#e0234e',
+  ink: '#10131A',
+  dim: '#4B5162',
+  faint: '#8891A3',
+  line: '#E4E7EF',
+  paper: '#FFFFFF',
+  soft: '#F4F6FA',
+  wall: '#EEF1F7',
+  slot: '#FAFBFD',
+  slotFree: '#FFFFFF',
+  drop: '#E6EDFE',
+  dropEdge: '#2757e2',
+  meeting: '#E7EAF2',
+  meetingInk: '#555D70',
+  deep: '#E4ECFF',
+  deepInk: '#1F49BE',
+  wait: '#FDF1DC',
+  waitInk: '#9A6B08',
+  plain: '#EDF0F6',
+  plainInk: '#3C4455',
+  mintTint: '#EAFBF4',
+  mintInk: '#12A177',
+  redTint: '#FDECF0',
+  redInk: '#B51C40',
+  clock: '#2757e2',
+  shade: 'rgba(16,19,26,0.08)',
+};
+
+export const view = {
+  board: { w: 1004, h: 500 },
+  maxScale: 1.3,
+  minRegion: { w: 320, h: 230 },
+  fontFamily: 'Urbanist, "Segoe UI", system-ui, -apple-system, sans-serif',
+
+  tray: { x: 2, y: 2, w: 246, top: 44, cardH: 52, gap: 7 },
+  grid: { x: 272, y: 2, w: 374, top: 44, labelW: 48, slotH: 22 },
+  chal: { x: 672, y: 2, w: 330, top: 44, chipH: 62, gap: 9 },
+};
+
+export const timing = {
+  place: 180,       // a job settling into the grid
+  runMs: 5200,      // the clock sweeping 08:00 to 18:00
+  beatIn: 220,
+  endHold: 700,
 };

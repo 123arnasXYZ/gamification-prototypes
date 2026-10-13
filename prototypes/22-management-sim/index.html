@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Build a Management Simulation — The Support Office</title>
+<!-- ?v= bumps the cache when the shared styling changes -->
+<link rel="stylesheet" href="../../shared/style.css?v=2">
+<style>
+  /* The day panel is tall. Messages go to the strip under the Restart
+     button instead of over the top of it. */
+  .toasts {
+    left: auto; right: 18px; bottom: auto; top: 58px;
+    transform: none; align-items: flex-end;
+    max-width: min(400px, 46vw);
+  }
+
+  .day {
+    width: 100%;
+    animation: rise .3s cubic-bezier(.2,.9,.3,1) both;
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+
+  .day .head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .day h2 { color: var(--blue); font-size: 17px; font-weight: 800; margin: 2px 0 4px; line-height: 1.15; }
+  .day .line { font-size: 13.5px; color: var(--ink-dim); margin: 0 0 10px; line-height: 1.45; }
+
+  .sub { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; font-weight: 700; color: var(--ink-dim); margin: 0 0 6px; }
+
+  .needs { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 11px; }
+  .need {
+    font-size: 12px; font-weight: 700; color: var(--ink);
+    border: 1px solid var(--line-2); border-radius: 999px;
+    padding: 4px 12px; background: var(--grey);
+  }
+  .need i { font-style: normal; color: var(--ink-dim); font-weight: 600; }
+
+  .acts { display: flex; gap: 8px; align-items: stretch; margin-bottom: 11px; }
+  .act {
+    flex: 1 1 0; min-width: 0;
+    font: inherit; font-size: 12.5px; font-weight: 700; text-align: left;
+    padding: 9px 12px; border-radius: var(--r-sm);
+    border: 2px solid var(--line-2); background: #fff; color: var(--ink);
+    cursor: pointer; transition: border-color .14s, opacity .14s;
+    line-height: 1.3; overflow-wrap: anywhere;
+  }
+  .act small { display: block; font-weight: 600; font-size: 11.5px; color: var(--ink-dim); margin-top: 3px; }
+  .act:hover:not(:disabled) { border-color: var(--blue); }
+  .act:disabled { cursor: default; opacity: .42; }
+
+  .close { display: flex; justify-content: flex-end; }
+
+  @media (max-width: 820px) {
+    .acts { flex-direction: column; }
+    .act { flex: none; }
+  }
+
+  /* ---- Handover ---- */
+  .over { max-width: 700px; margin: 0 auto; max-height: 56vh; overflow-y: auto; }
+  .over h2 { color: var(--blue); font-size: 21px; margin: 2px 0 6px; line-height: 1.1; }
+  .over .lead { font-size: 13.5px; color: var(--ink-dim); margin: 0 0 14px; }
+  .over section { margin-bottom: 13px; }
+  .beat { border-left: 3px solid var(--line-2); padding: 2px 0 2px 11px; margin-bottom: 6px; font-size: 13px; color: var(--ink-dim); line-height: 1.45; }
+  .beat b { color: var(--ink); }
+  .beat.warn { border-left-color: var(--danger); }
+  .beat.ok   { border-left-color: var(--good); }
+  .beat.next { border-left-color: var(--blue); font-size: 13.5px; color: var(--ink); }
+  .over .point { font-size: 13px; color: var(--ink); font-style: italic; margin: 14px 0 12px; line-height: 1.45; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<div class="stage" id="stage"></div>
+
+<div class="ui-layer">
+  <div class="topbar" style="align-items:flex-start">
+    <div class="panel">
+      <div class="eyebrow" id="eyebrow"></div>
+      <div class="title" id="title"></div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn ghost clickable" id="restart" type="button">Restart</button>
+  </div>
+
+  <div style="flex:1"></div>
+
+  <div class="dock">
+    <div class="hint" id="hint"></div>
+  </div>
+
+  <div class="panel clickable" id="panel" style="width:min(1060px,100%);margin:0 auto"></div>
+</div>
+
+<div class="loading" id="loading">Unlocking the office…</div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>
